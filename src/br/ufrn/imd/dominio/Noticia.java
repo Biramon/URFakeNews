@@ -13,13 +13,11 @@ public class Noticia implements ProcessamentoMensagem {
 	protected String textoProcessado;
 	protected Date dataHoraAcesso;
 	protected String url;
-	public Noticia(String textoOriginal){
-		this.textoOriginal = textoOriginal;
-		this.textoProcessado = this.textoOriginal;
+	public Noticia(){
 	}
 	//Ao invés de se fazer um mapeamento para cada caso, achamos esse método na internet e resolvemos,
 	//implementá-lo para simplificar o problema.
-	public static String deAccent(String str){
+	private String deAccent(String str){
 	    String nfdNormalizedString = Normalizer.normalize(str, Normalizer.Form.NFD); 
 	    Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
 	    return pattern.matcher(nfdNormalizedString).replaceAll("");
@@ -70,13 +68,19 @@ public class Noticia implements ProcessamentoMensagem {
 		aux.add("}");
 		aux.add("[");
 		aux.add("]");
+		aux.add("’");
+		aux.add("‘");
+		aux.add("”");
+		aux.add("“");
 		for(String a : aux){
 			this.textoProcessado = this.textoProcessado.replace(a,"");
 		}
+		this.textoProcessado = this.textoProcessado.replace("ç","c");
+		this.textoProcessado = this.textoProcessado.replace("Ç","C");
 	}
 	@Override
 	public void removerAcentuacao() {
-		this.textoProcessado = deAccent(this.textoProcessado);
+		this.textoProcessado = this.deAccent(this.textoProcessado);
 	}
 
 	@Override
