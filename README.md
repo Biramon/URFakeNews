@@ -18,5 +18,6 @@ Pendente:
 Para a correta execução do projeto se faz necessário o uso dos seguintes jars:
 $ Apache Commons Lang » 3.9
 $ opencsv-4.6
+
 (Os mesmos se encontram presentes na pasta libs do projeto)
 
