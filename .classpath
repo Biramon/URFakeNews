@@ -11,11 +11,8 @@
 			<accessrule kind="accessible" pattern="javafx/**"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Yan/eclipse-workspace/FakeNews/libs/commons-lang3-3.9/commons-lang3-3.9.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Yan/eclipse-workspace/FakeNews/libs/commons-lang3-3.9/commons-lang3-3.9-sources.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Yan/eclipse-workspace/FakeNews/libs/commons-lang3-3.9/commons-lang3-3.9-tests.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Yan/eclipse-workspace/FakeNews/libs/commons-lang3-3.9/commons-lang3-3.9-test-sources.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Yan/eclipse-workspace/FakeNews/libs/opencsv-4.6.jar"/>
-	<classpathentry kind="lib" path="/opt/SceneBuilder/runtime/lib/ext/jfxrt.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/commomLang"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenCSV"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/TextSimilarity"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
