@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -14,15 +15,16 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.ufrn.imd.controle.TelaPrincipalController.java">
+<BorderPane prefHeight="430.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.ufrn.imd.controle.TelaPrincipalController">
    <top>
-      <MenuBar BorderPane.alignment="CENTER">
+      <MenuBar prefHeight="13.0" prefWidth="595.0" BorderPane.alignment="CENTER">
         <menus>
           <Menu mnemonicParsing="false" text="Arquivo">
             <items>
                   <Menu mnemonicParsing="false" text="Base Fake News">
                     <items>
                     <MenuItem fx:id="menuAbrirArquivo" mnemonicParsing="false" onAction="#abrirArquivoBase" text="Abrir Arquivo" />
+                        <MenuItem fx:id="miAlterarTamanhoCorte" mnemonicParsing="false" text="Alterar Tamanho de Corte" />
                     </items>
                   </Menu>
             </items>
@@ -42,17 +44,18 @@
       <GridPane alignment="CENTER" prefHeight="84.0" prefWidth="239.0" BorderPane.alignment="CENTER">
         <columnConstraints>
           <ColumnConstraints fillWidth="false" halignment="CENTER" hgrow="ALWAYS" />
+            <ColumnConstraints fillWidth="false" halignment="CENTER" hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
-          <RowConstraints fillHeight="false" maxHeight="250.0" minHeight="10.0" prefHeight="250.0" valignment="CENTER" vgrow="SOMETIMES" />
-          <RowConstraints maxHeight="173.0" minHeight="4.0" prefHeight="27.0" vgrow="SOMETIMES" />
-            <RowConstraints maxHeight="168.0" minHeight="10.0" prefHeight="32.0" vgrow="SOMETIMES" />
-          <RowConstraints maxHeight="82.0" minHeight="13.0" prefHeight="49.0" vgrow="SOMETIMES" />
+          <RowConstraints fillHeight="false" maxHeight="266.0" minHeight="10.0" prefHeight="266.0" valignment="CENTER" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="173.0" minHeight="4.0" prefHeight="42.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="168.0" minHeight="10.0" prefHeight="41.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="102.0" minHeight="13.0" prefHeight="102.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <ImageView fx:id="imagemLogo" fitHeight="187.0" fitWidth="305.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true">
+            <ImageView fx:id="imagemLogo" fitHeight="187.0" fitWidth="305.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" GridPane.columnSpan="2">
                <image>
-                  <Image url="@logoinicial.jpg" />
+                  <Image url="@logoinicial" />
                </image>
             </ImageView>
             <Label fx:id="labelInfoUsuario" text="Digite ou cole a URL da notícia a ser analisada abaixo:" GridPane.rowIndex="1">
@@ -60,8 +63,11 @@
                   <Font size="15.0" />
                </font>
             </Label>
-            <Button mnemonicParsing="false" text="Analisar Notícia" GridPane.rowIndex="3" />
-            <TextField fx:id="textfieldURL" prefHeight="25.0" prefWidth="365.0" GridPane.rowIndex="2" />
+            <TextField fx:id="textfieldURL" prefHeight="26.0" prefWidth="448.0" GridPane.rowIndex="2" />
+            <Button fx:id="btAnalisarNoticia" mnemonicParsing="false" onAction="#AnalisarNoticia" text="Analisar Notícia" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+            <Slider fx:id="slLimiarConfianca" blockIncrement="5.0" value="50.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label text="Limiar de Confiança" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label fx:id="valorLimiar" text="50" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="TOP" />
          </children>
       </GridPane>
    </center>

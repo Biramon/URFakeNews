@@ -12,7 +12,7 @@ import javafx.scene.layout.Pane;
 public class Main extends Application {
 	@Override
 	public void start(Stage primaryStage) throws IOException {
-		Pane root = FXMLLoader.load( getClass().getResource("TelaPrincipal.fxml") );
+		Pane root = FXMLLoader.load( getClass().getResource("../br/ufrn/imd/TelaPrincipal.fxml") );
 		
 		Scene cena = new Scene(root, 600, 400); 
 		primaryStage.setScene(cena);
