@@ -5,7 +5,6 @@ import java.io.IOException;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -66,14 +65,41 @@ public class TelaPrincipalController {
     }
     
     @FXML
-    void menuitemSobreClicado(ActionEvent event) throws IOException {
-    	Parent TelaSobreParent = FXMLLoader.load(getClass().getResource("TelaSobre.fxml"));
-    	Scene SobreScene = new Scene (TelaSobreParent);
+    void menuitemSobreClicado(ActionEvent event) {
+    	try {
+    	FXMLLoader fxmlLoader = new FXMLLoader( getClass().getResource("../visao/TelaSobre.fxml") );	
+		Parent root1 = (Parent) fxmlLoader.load();
+		
+		Stage stage = new Stage();
+		Scene cenateste = new Scene(root1);
+		
+		stage.setScene(cenateste);
+		stage.setResizable(false);
+		stage.setTitle("Sobre");
+		stage.show();
+		} catch (IOException e) {
+			System.out.println("Não deu certo abrir a janela!");
+			e.printStackTrace();
+		}
     	
-    	Stage janelaSobre = (Stage) ((Node)event.getSource()).getScene().getWindow();
-    	janelaSobre.setScene(SobreScene);
-    	janelaSobre.setTitle("Sobre");
-    	janelaSobre.show();
-    	
+    }
+    
+
+    @FXML
+    void miAlterarTamanhoCorteClicado(ActionEvent event) {
+    	try {
+        	FXMLLoader fxmlLoader = new FXMLLoader( getClass().getResource("../visao/TelaAlterarTamanhoCorte.fxml") );	
+    		Parent root1 = (Parent) fxmlLoader.load();
+    		
+    		Stage stage = new Stage();
+    		   		
+    		stage.setScene(new Scene(root1));
+    		stage.setResizable(false);
+    		stage.setTitle("Alterar Tamanho de Corte");
+    		stage.show();
+    		} catch (IOException e) {
+    			System.out.println("Não deu certo abrir a janela!");
+    			e.printStackTrace();
+    		}
     }
 }

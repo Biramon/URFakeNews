@@ -24,7 +24,7 @@
                   <Menu mnemonicParsing="false" text="Base Fake News">
                     <items>
                     <MenuItem fx:id="menuAbrirArquivo" mnemonicParsing="false" onAction="#abrirArquivoBase" text="Abrir Arquivo" />
-                        <MenuItem fx:id="miAlterarTamanhoCorte" mnemonicParsing="false" text="Alterar Tamanho de Corte" />
+                        <MenuItem fx:id="miAlterarTamanhoCorte" mnemonicParsing="false" onAction="#miAlterarTamanhoCorteClicado" text="Alterar Tamanho de Corte" />
                     </items>
                   </Menu>
             </items>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.ufrn.imd.controle.TelaAlterarTamanhoCorteController">
+   <children>
+      <Label layoutX="36.0" layoutY="41.0" text="Deseja alterar o limite de corte? " textAlignment="JUSTIFY">
+         <font>
+            <Font name="System Bold" size="15.0" />
+         </font>
+      </Label>
+      <Label layoutX="41.0" layoutY="73.0" text="Por padrão utilizamos 3 como limite" textAlignment="CENTER" wrapText="true">
+         <font>
+            <Font size="13.0" />
+         </font>
+      </Label>
+      <TextField fx:id="tfAlterarCorte" layoutX="76.0" layoutY="100.0" />
+      <Button fx:id="btAlterar" layoutX="76.0" layoutY="142.0" mnemonicParsing="false" onAction="#btAlterarClicado" text="Alterar" />
+      <Button fx:id="btFechar" layoutX="167.0" layoutY="142.0" mnemonicParsing="false" onAction="#btFecharClicado" text="Fechar" />
+   </children>
+</AnchorPane>

@@ -20,7 +20,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/commom2"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/openCsV"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/textSimilarity2"/>
-	<classpathentry kind="lib" path="/opt/SceneBuilder/runtime/lib/ext/jfxrt.jar"/>
 	<classpathentry kind="lib" path="libs/opencsv-4.6.jar"/>
 	<classpathentry kind="lib" path="libs/commons-lang3-3.9/commons-lang3-3.9-sources.jar"/>
 	<classpathentry kind="lib" path="libs/commons-lang3-3.9/commons-lang3-3.9-test-sources.jar"/>
@@ -31,10 +30,5 @@
 	<classpathentry kind="lib" path="libs/commons-text-1.6/commons-text-1.6-test-sources.jar"/>
 	<classpathentry kind="lib" path="libs/commons-text-1.6/commons-text-1.6-tests.jar"/>
 	<classpathentry kind="lib" path="libs/commons-text-1.6/commons-text-1.6.jar"/>
-	<classpathentry kind="lib" path="/home/biramon/Downloads/commons-text-1.6-bin/commons-text-1.6/commons-text-1.6.jar"/>
-	<classpathentry kind="lib" path="/home/biramon/Downloads/commons-text-1.6-bin/commons-text-1.6/commons-text-1.6-javadoc.jar"/>
-	<classpathentry kind="lib" path="/home/biramon/Downloads/commons-text-1.6-bin/commons-text-1.6/commons-text-1.6-sources.jar"/>
-	<classpathentry kind="lib" path="/home/biramon/Downloads/commons-text-1.6-bin/commons-text-1.6/commons-text-1.6-tests.jar"/>
-	<classpathentry kind="lib" path="/home/biramon/Downloads/commons-text-1.6-bin/commons-text-1.6/commons-text-1.6-test-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
