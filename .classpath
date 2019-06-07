@@ -30,5 +30,6 @@
 	<classpathentry kind="lib" path="libs/commons-text-1.6/commons-text-1.6-test-sources.jar"/>
 	<classpathentry kind="lib" path="libs/commons-text-1.6/commons-text-1.6-tests.jar"/>
 	<classpathentry kind="lib" path="libs/commons-text-1.6/commons-text-1.6.jar"/>
+	<classpathentry kind="lib" path="/opt/SceneBuilder/runtime/lib/ext/jfxrt.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

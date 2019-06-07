@@ -1,5 +1,6 @@
 package br.ufrn.imd.controle;
 
+import java.io.File;
 import java.io.IOException;
 
 import javafx.event.ActionEvent;
@@ -14,6 +15,8 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 public class TelaPrincipalController {
@@ -56,7 +59,12 @@ public class TelaPrincipalController {
 
     @FXML
     void abrirArquivoBase(ActionEvent event) {
-
+    	FileChooser fc = new FileChooser();
+    	fc.getExtensionFilters().add( new ExtensionFilter("Arquivos CSV", "*.csv"));
+    	File f = fc.showOpenDialog(null);
+    	
+    	//Apenas para teste, depois pegar o caminho absoluto para poder jogar para as classes de modelo
+    	if (f != null) System.out.println(f.getAbsolutePath());
     }
     
     @FXML
@@ -78,7 +86,7 @@ public class TelaPrincipalController {
 		stage.setTitle("Sobre");
 		stage.show();
 		} catch (IOException e) {
-			System.out.println("Não deu certo abrir a janela!");
+			System.out.println("Nï¿½o deu certo abrir a janela!");
 			e.printStackTrace();
 		}
     	
@@ -98,7 +106,7 @@ public class TelaPrincipalController {
     		stage.setTitle("Alterar Tamanho de Corte");
     		stage.show();
     		} catch (IOException e) {
-    			System.out.println("Não deu certo abrir a janela!");
+    			System.out.println("Nï¿½o deu certo abrir a janela!");
     			e.printStackTrace();
     		}
     }
