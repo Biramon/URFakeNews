@@ -1,0 +1,516 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<main role="main">
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a id="line.1">/*</a>
+<span class="sourceLineNo">002</span><a id="line.2"> * Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<span class="sourceLineNo">003</span><a id="line.3"> * contributor license agreements.  See the NOTICE file distributed with</a>
+<span class="sourceLineNo">004</span><a id="line.4"> * this work for additional information regarding copyright ownership.</a>
+<span class="sourceLineNo">005</span><a id="line.5"> * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<span class="sourceLineNo">006</span><a id="line.6"> * (the "License"); you may not use this file except in compliance with</a>
+<span class="sourceLineNo">007</span><a id="line.7"> * the License.  You may obtain a copy of the License at</a>
+<span class="sourceLineNo">008</span><a id="line.8"> *</a>
+<span class="sourceLineNo">009</span><a id="line.9"> *      http://www.apache.org/licenses/LICENSE-2.0</a>
+<span class="sourceLineNo">010</span><a id="line.10"> *</a>
+<span class="sourceLineNo">011</span><a id="line.11"> * Unless required by applicable law or agreed to in writing, software</a>
+<span class="sourceLineNo">012</span><a id="line.12"> * distributed under the License is distributed on an "AS IS" BASIS,</a>
+<span class="sourceLineNo">013</span><a id="line.13"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<span class="sourceLineNo">014</span><a id="line.14"> * See the License for the specific language governing permissions and</a>
+<span class="sourceLineNo">015</span><a id="line.15"> * limitations under the License.</a>
+<span class="sourceLineNo">016</span><a id="line.16"> */</a>
+<span class="sourceLineNo">017</span><a id="line.17">package org.apache.commons.text.translate;</a>
+<span class="sourceLineNo">018</span><a id="line.18"></a>
+<span class="sourceLineNo">019</span><a id="line.19">import java.util.Collections;</a>
+<span class="sourceLineNo">020</span><a id="line.20">import java.util.HashMap;</a>
+<span class="sourceLineNo">021</span><a id="line.21">import java.util.Map;</a>
+<span class="sourceLineNo">022</span><a id="line.22"></a>
+<span class="sourceLineNo">023</span><a id="line.23">/**</a>
+<span class="sourceLineNo">024</span><a id="line.24"> * Class holding various entity data for HTML and XML - generally for use with</a>
+<span class="sourceLineNo">025</span><a id="line.25"> * the LookupTranslator.</a>
+<span class="sourceLineNo">026</span><a id="line.26"> * All Maps are generated using &lt;code&gt;java.util.Collections.unmodifiableMap()&lt;/code&gt;.</a>
+<span class="sourceLineNo">027</span><a id="line.27"> *</a>
+<span class="sourceLineNo">028</span><a id="line.28"> * @since 1.0</a>
+<span class="sourceLineNo">029</span><a id="line.29"> */</a>
+<span class="sourceLineNo">030</span><a id="line.30">public class EntityArrays {</a>
+<span class="sourceLineNo">031</span><a id="line.31"></a>
+<span class="sourceLineNo">032</span><a id="line.32">   /**</a>
+<span class="sourceLineNo">033</span><a id="line.33">     * A Map&amp;lt;CharSequence, CharSequence&amp;gt; to to escape</a>
+<span class="sourceLineNo">034</span><a id="line.34">     * &lt;a href="https://secure.wikimedia.org/wikipedia/en/wiki/ISO/IEC_8859-1"&gt;ISO-8859-1&lt;/a&gt;</a>
+<span class="sourceLineNo">035</span><a id="line.35">     * characters to their named HTML 3.x equivalents.</a>
+<span class="sourceLineNo">036</span><a id="line.36">     */</a>
+<span class="sourceLineNo">037</span><a id="line.37">    public static final Map&lt;CharSequence, CharSequence&gt; ISO8859_1_ESCAPE;</a>
+<span class="sourceLineNo">038</span><a id="line.38">    static {</a>
+<span class="sourceLineNo">039</span><a id="line.39">        final Map&lt;CharSequence, CharSequence&gt; initialMap = new HashMap&lt;&gt;();</a>
+<span class="sourceLineNo">040</span><a id="line.40">        initialMap.put("\u00A0", "&amp;nbsp;"); // non-breaking space</a>
+<span class="sourceLineNo">041</span><a id="line.41">        initialMap.put("\u00A1", "&amp;iexcl;"); // inverted exclamation mark</a>
+<span class="sourceLineNo">042</span><a id="line.42">        initialMap.put("\u00A2", "&amp;cent;"); // cent sign</a>
+<span class="sourceLineNo">043</span><a id="line.43">        initialMap.put("\u00A3", "&amp;pound;"); // pound sign</a>
+<span class="sourceLineNo">044</span><a id="line.44">        initialMap.put("\u00A4", "&amp;curren;"); // currency sign</a>
+<span class="sourceLineNo">045</span><a id="line.45">        initialMap.put("\u00A5", "&amp;yen;"); // yen sign = yuan sign</a>
+<span class="sourceLineNo">046</span><a id="line.46">        initialMap.put("\u00A6", "&amp;brvbar;"); // broken bar = broken vertical bar</a>
+<span class="sourceLineNo">047</span><a id="line.47">        initialMap.put("\u00A7", "&amp;sect;"); // section sign</a>
+<span class="sourceLineNo">048</span><a id="line.48">        initialMap.put("\u00A8", "&amp;uml;"); // diaeresis = spacing diaeresis</a>
+<span class="sourceLineNo">049</span><a id="line.49">        initialMap.put("\u00A9", "&amp;copy;"); // © - copyright sign</a>
+<span class="sourceLineNo">050</span><a id="line.50">        initialMap.put("\u00AA", "&amp;ordf;"); // feminine ordinal indicator</a>
+<span class="sourceLineNo">051</span><a id="line.51">        initialMap.put("\u00AB", "&amp;laquo;"); // left-pointing double angle quotation mark = left pointing guillemet</a>
+<span class="sourceLineNo">052</span><a id="line.52">        initialMap.put("\u00AC", "&amp;not;"); // not sign</a>
+<span class="sourceLineNo">053</span><a id="line.53">        initialMap.put("\u00AD", "&amp;shy;"); // soft hyphen = discretionary hyphen</a>
+<span class="sourceLineNo">054</span><a id="line.54">        initialMap.put("\u00AE", "&amp;reg;"); // ® - registered trademark sign</a>
+<span class="sourceLineNo">055</span><a id="line.55">        initialMap.put("\u00AF", "&amp;macr;"); // macron = spacing macron = overline = APL overbar</a>
+<span class="sourceLineNo">056</span><a id="line.56">        initialMap.put("\u00B0", "&amp;deg;"); // degree sign</a>
+<span class="sourceLineNo">057</span><a id="line.57">        initialMap.put("\u00B1", "&amp;plusmn;"); // plus-minus sign = plus-or-minus sign</a>
+<span class="sourceLineNo">058</span><a id="line.58">        initialMap.put("\u00B2", "&amp;sup2;"); // superscript two = superscript digit two = squared</a>
+<span class="sourceLineNo">059</span><a id="line.59">        initialMap.put("\u00B3", "&amp;sup3;"); // superscript three = superscript digit three = cubed</a>
+<span class="sourceLineNo">060</span><a id="line.60">        initialMap.put("\u00B4", "&amp;acute;"); // acute accent = spacing acute</a>
+<span class="sourceLineNo">061</span><a id="line.61">        initialMap.put("\u00B5", "&amp;micro;"); // micro sign</a>
+<span class="sourceLineNo">062</span><a id="line.62">        initialMap.put("\u00B6", "&amp;para;"); // pilcrow sign = paragraph sign</a>
+<span class="sourceLineNo">063</span><a id="line.63">        initialMap.put("\u00B7", "&amp;middot;"); // middle dot = Georgian comma = Greek middle dot</a>
+<span class="sourceLineNo">064</span><a id="line.64">        initialMap.put("\u00B8", "&amp;cedil;"); // cedilla = spacing cedilla</a>
+<span class="sourceLineNo">065</span><a id="line.65">        initialMap.put("\u00B9", "&amp;sup1;"); // superscript one = superscript digit one</a>
+<span class="sourceLineNo">066</span><a id="line.66">        initialMap.put("\u00BA", "&amp;ordm;"); // masculine ordinal indicator</a>
+<span class="sourceLineNo">067</span><a id="line.67">        initialMap.put("\u00BB", "&amp;raquo;"); // right-pointing double angle quotation mark = right pointing guillemet</a>
+<span class="sourceLineNo">068</span><a id="line.68">        initialMap.put("\u00BC", "&amp;frac14;"); // vulgar fraction one quarter = fraction one quarter</a>
+<span class="sourceLineNo">069</span><a id="line.69">        initialMap.put("\u00BD", "&amp;frac12;"); // vulgar fraction one half = fraction one half</a>
+<span class="sourceLineNo">070</span><a id="line.70">        initialMap.put("\u00BE", "&amp;frac34;"); // vulgar fraction three quarters = fraction three quarters</a>
+<span class="sourceLineNo">071</span><a id="line.71">        initialMap.put("\u00BF", "&amp;iquest;"); // inverted question mark = turned question mark</a>
+<span class="sourceLineNo">072</span><a id="line.72">        initialMap.put("\u00C0", "&amp;Agrave;"); // À - uppercase A, grave accent</a>
+<span class="sourceLineNo">073</span><a id="line.73">        initialMap.put("\u00C1", "&amp;Aacute;"); // Á - uppercase A, acute accent</a>
+<span class="sourceLineNo">074</span><a id="line.74">        initialMap.put("\u00C2", "&amp;Acirc;"); // Â - uppercase A, circumflex accent</a>
+<span class="sourceLineNo">075</span><a id="line.75">        initialMap.put("\u00C3", "&amp;Atilde;"); // Ã - uppercase A, tilde</a>
+<span class="sourceLineNo">076</span><a id="line.76">        initialMap.put("\u00C4", "&amp;Auml;"); // Ä - uppercase A, umlaut</a>
+<span class="sourceLineNo">077</span><a id="line.77">        initialMap.put("\u00C5", "&amp;Aring;"); // Å - uppercase A, ring</a>
+<span class="sourceLineNo">078</span><a id="line.78">        initialMap.put("\u00C6", "&amp;AElig;"); // Æ - uppercase AE</a>
+<span class="sourceLineNo">079</span><a id="line.79">        initialMap.put("\u00C7", "&amp;Ccedil;"); // Ç - uppercase C, cedilla</a>
+<span class="sourceLineNo">080</span><a id="line.80">        initialMap.put("\u00C8", "&amp;Egrave;"); // È - uppercase E, grave accent</a>
+<span class="sourceLineNo">081</span><a id="line.81">        initialMap.put("\u00C9", "&amp;Eacute;"); // É - uppercase E, acute accent</a>
+<span class="sourceLineNo">082</span><a id="line.82">        initialMap.put("\u00CA", "&amp;Ecirc;"); // Ê - uppercase E, circumflex accent</a>
+<span class="sourceLineNo">083</span><a id="line.83">        initialMap.put("\u00CB", "&amp;Euml;"); // Ë - uppercase E, umlaut</a>
+<span class="sourceLineNo">084</span><a id="line.84">        initialMap.put("\u00CC", "&amp;Igrave;"); // Ì - uppercase I, grave accent</a>
+<span class="sourceLineNo">085</span><a id="line.85">        initialMap.put("\u00CD", "&amp;Iacute;"); // Í - uppercase I, acute accent</a>
+<span class="sourceLineNo">086</span><a id="line.86">        initialMap.put("\u00CE", "&amp;Icirc;"); // Î - uppercase I, circumflex accent</a>
+<span class="sourceLineNo">087</span><a id="line.87">        initialMap.put("\u00CF", "&amp;Iuml;"); // Ï - uppercase I, umlaut</a>
+<span class="sourceLineNo">088</span><a id="line.88">        initialMap.put("\u00D0", "&amp;ETH;"); // Ð - uppercase Eth, Icelandic</a>
+<span class="sourceLineNo">089</span><a id="line.89">        initialMap.put("\u00D1", "&amp;Ntilde;"); // Ñ - uppercase N, tilde</a>
+<span class="sourceLineNo">090</span><a id="line.90">        initialMap.put("\u00D2", "&amp;Ograve;"); // Ò - uppercase O, grave accent</a>
+<span class="sourceLineNo">091</span><a id="line.91">        initialMap.put("\u00D3", "&amp;Oacute;"); // Ó - uppercase O, acute accent</a>
+<span class="sourceLineNo">092</span><a id="line.92">        initialMap.put("\u00D4", "&amp;Ocirc;"); // Ô - uppercase O, circumflex accent</a>
+<span class="sourceLineNo">093</span><a id="line.93">        initialMap.put("\u00D5", "&amp;Otilde;"); // Õ - uppercase O, tilde</a>
+<span class="sourceLineNo">094</span><a id="line.94">        initialMap.put("\u00D6", "&amp;Ouml;"); // Ö - uppercase O, umlaut</a>
+<span class="sourceLineNo">095</span><a id="line.95">        initialMap.put("\u00D7", "&amp;times;"); // multiplication sign</a>
+<span class="sourceLineNo">096</span><a id="line.96">        initialMap.put("\u00D8", "&amp;Oslash;"); // Ø - uppercase O, slash</a>
+<span class="sourceLineNo">097</span><a id="line.97">        initialMap.put("\u00D9", "&amp;Ugrave;"); // Ù - uppercase U, grave accent</a>
+<span class="sourceLineNo">098</span><a id="line.98">        initialMap.put("\u00DA", "&amp;Uacute;"); // Ú - uppercase U, acute accent</a>
+<span class="sourceLineNo">099</span><a id="line.99">        initialMap.put("\u00DB", "&amp;Ucirc;"); // Û - uppercase U, circumflex accent</a>
+<span class="sourceLineNo">100</span><a id="line.100">        initialMap.put("\u00DC", "&amp;Uuml;"); // Ü - uppercase U, umlaut</a>
+<span class="sourceLineNo">101</span><a id="line.101">        initialMap.put("\u00DD", "&amp;Yacute;"); // Ý - uppercase Y, acute accent</a>
+<span class="sourceLineNo">102</span><a id="line.102">        initialMap.put("\u00DE", "&amp;THORN;"); // Þ - uppercase THORN, Icelandic</a>
+<span class="sourceLineNo">103</span><a id="line.103">        initialMap.put("\u00DF", "&amp;szlig;"); // ß - lowercase sharps, German</a>
+<span class="sourceLineNo">104</span><a id="line.104">        initialMap.put("\u00E0", "&amp;agrave;"); // à - lowercase a, grave accent</a>
+<span class="sourceLineNo">105</span><a id="line.105">        initialMap.put("\u00E1", "&amp;aacute;"); // á - lowercase a, acute accent</a>
+<span class="sourceLineNo">106</span><a id="line.106">        initialMap.put("\u00E2", "&amp;acirc;"); // â - lowercase a, circumflex accent</a>
+<span class="sourceLineNo">107</span><a id="line.107">        initialMap.put("\u00E3", "&amp;atilde;"); // ã - lowercase a, tilde</a>
+<span class="sourceLineNo">108</span><a id="line.108">        initialMap.put("\u00E4", "&amp;auml;"); // ä - lowercase a, umlaut</a>
+<span class="sourceLineNo">109</span><a id="line.109">        initialMap.put("\u00E5", "&amp;aring;"); // å - lowercase a, ring</a>
+<span class="sourceLineNo">110</span><a id="line.110">        initialMap.put("\u00E6", "&amp;aelig;"); // æ - lowercase ae</a>
+<span class="sourceLineNo">111</span><a id="line.111">        initialMap.put("\u00E7", "&amp;ccedil;"); // ç - lowercase c, cedilla</a>
+<span class="sourceLineNo">112</span><a id="line.112">        initialMap.put("\u00E8", "&amp;egrave;"); // è - lowercase e, grave accent</a>
+<span class="sourceLineNo">113</span><a id="line.113">        initialMap.put("\u00E9", "&amp;eacute;"); // é - lowercase e, acute accent</a>
+<span class="sourceLineNo">114</span><a id="line.114">        initialMap.put("\u00EA", "&amp;ecirc;"); // ê - lowercase e, circumflex accent</a>
+<span class="sourceLineNo">115</span><a id="line.115">        initialMap.put("\u00EB", "&amp;euml;"); // ë - lowercase e, umlaut</a>
+<span class="sourceLineNo">116</span><a id="line.116">        initialMap.put("\u00EC", "&amp;igrave;"); // ì - lowercase i, grave accent</a>
+<span class="sourceLineNo">117</span><a id="line.117">        initialMap.put("\u00ED", "&amp;iacute;"); // í - lowercase i, acute accent</a>
+<span class="sourceLineNo">118</span><a id="line.118">        initialMap.put("\u00EE", "&amp;icirc;"); // î - lowercase i, circumflex accent</a>
+<span class="sourceLineNo">119</span><a id="line.119">        initialMap.put("\u00EF", "&amp;iuml;"); // ï - lowercase i, umlaut</a>
+<span class="sourceLineNo">120</span><a id="line.120">        initialMap.put("\u00F0", "&amp;eth;"); // ð - lowercase eth, Icelandic</a>
+<span class="sourceLineNo">121</span><a id="line.121">        initialMap.put("\u00F1", "&amp;ntilde;"); // ñ - lowercase n, tilde</a>
+<span class="sourceLineNo">122</span><a id="line.122">        initialMap.put("\u00F2", "&amp;ograve;"); // ò - lowercase o, grave accent</a>
+<span class="sourceLineNo">123</span><a id="line.123">        initialMap.put("\u00F3", "&amp;oacute;"); // ó - lowercase o, acute accent</a>
+<span class="sourceLineNo">124</span><a id="line.124">        initialMap.put("\u00F4", "&amp;ocirc;"); // ô - lowercase o, circumflex accent</a>
+<span class="sourceLineNo">125</span><a id="line.125">        initialMap.put("\u00F5", "&amp;otilde;"); // õ - lowercase o, tilde</a>
+<span class="sourceLineNo">126</span><a id="line.126">        initialMap.put("\u00F6", "&amp;ouml;"); // ö - lowercase o, umlaut</a>
+<span class="sourceLineNo">127</span><a id="line.127">        initialMap.put("\u00F7", "&amp;divide;"); // division sign</a>
+<span class="sourceLineNo">128</span><a id="line.128">        initialMap.put("\u00F8", "&amp;oslash;"); // ø - lowercase o, slash</a>
+<span class="sourceLineNo">129</span><a id="line.129">        initialMap.put("\u00F9", "&amp;ugrave;"); // ù - lowercase u, grave accent</a>
+<span class="sourceLineNo">130</span><a id="line.130">        initialMap.put("\u00FA", "&amp;uacute;"); // ú - lowercase u, acute accent</a>
+<span class="sourceLineNo">131</span><a id="line.131">        initialMap.put("\u00FB", "&amp;ucirc;"); // û - lowercase u, circumflex accent</a>
+<span class="sourceLineNo">132</span><a id="line.132">        initialMap.put("\u00FC", "&amp;uuml;"); // ü - lowercase u, umlaut</a>
+<span class="sourceLineNo">133</span><a id="line.133">        initialMap.put("\u00FD", "&amp;yacute;"); // ý - lowercase y, acute accent</a>
+<span class="sourceLineNo">134</span><a id="line.134">        initialMap.put("\u00FE", "&amp;thorn;"); // þ - lowercase thorn, Icelandic</a>
+<span class="sourceLineNo">135</span><a id="line.135">        initialMap.put("\u00FF", "&amp;yuml;"); // ÿ - lowercase y, umlaut</a>
+<span class="sourceLineNo">136</span><a id="line.136">        ISO8859_1_ESCAPE = Collections.unmodifiableMap(initialMap);</a>
+<span class="sourceLineNo">137</span><a id="line.137">    }</a>
+<span class="sourceLineNo">138</span><a id="line.138"></a>
+<span class="sourceLineNo">139</span><a id="line.139">    /**</a>
+<span class="sourceLineNo">140</span><a id="line.140">     * Reverse of {@link #ISO8859_1_ESCAPE} for unescaping purposes.</a>
+<span class="sourceLineNo">141</span><a id="line.141">     */</a>
+<span class="sourceLineNo">142</span><a id="line.142">    public static final Map&lt;CharSequence, CharSequence&gt; ISO8859_1_UNESCAPE;</a>
+<span class="sourceLineNo">143</span><a id="line.143">    static {</a>
+<span class="sourceLineNo">144</span><a id="line.144">        ISO8859_1_UNESCAPE = Collections.unmodifiableMap(invert(ISO8859_1_ESCAPE));</a>
+<span class="sourceLineNo">145</span><a id="line.145">    }</a>
+<span class="sourceLineNo">146</span><a id="line.146"></a>
+<span class="sourceLineNo">147</span><a id="line.147">    /**</a>
+<span class="sourceLineNo">148</span><a id="line.148">     * A Map&amp;lt;CharSequence, CharSequence&amp;gt; to escape additional</a>
+<span class="sourceLineNo">149</span><a id="line.149">     * &lt;a href="http://www.w3.org/TR/REC-html40/sgml/entities.html"&gt;character entity</a>
+<span class="sourceLineNo">150</span><a id="line.150">     * references&lt;/a&gt;. Note that this must be used with {@link #ISO8859_1_ESCAPE} to get the full list of</a>
+<span class="sourceLineNo">151</span><a id="line.151">     * HTML 4.0 character entities.</a>
+<span class="sourceLineNo">152</span><a id="line.152">     */</a>
+<span class="sourceLineNo">153</span><a id="line.153">    public static final Map&lt;CharSequence, CharSequence&gt; HTML40_EXTENDED_ESCAPE;</a>
+<span class="sourceLineNo">154</span><a id="line.154">    static {</a>
+<span class="sourceLineNo">155</span><a id="line.155">        final Map&lt;CharSequence, CharSequence&gt; initialMap = new HashMap&lt;&gt;();</a>
+<span class="sourceLineNo">156</span><a id="line.156">        // &lt;!-- Latin Extended-B --&gt;</a>
+<span class="sourceLineNo">157</span><a id="line.157">        initialMap.put("\u0192", "&amp;fnof;"); // latin small f with hook = function= florin, U+0192 ISOtech --&gt;</a>
+<span class="sourceLineNo">158</span><a id="line.158">        // &lt;!-- Greek --&gt;</a>
+<span class="sourceLineNo">159</span><a id="line.159">        initialMap.put("\u0391", "&amp;Alpha;"); // greek capital letter alpha, U+0391 --&gt;</a>
+<span class="sourceLineNo">160</span><a id="line.160">        initialMap.put("\u0392", "&amp;Beta;"); // greek capital letter beta, U+0392 --&gt;</a>
+<span class="sourceLineNo">161</span><a id="line.161">        initialMap.put("\u0393", "&amp;Gamma;"); // greek capital letter gamma,U+0393 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">162</span><a id="line.162">        initialMap.put("\u0394", "&amp;Delta;"); // greek capital letter delta,U+0394 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">163</span><a id="line.163">        initialMap.put("\u0395", "&amp;Epsilon;"); // greek capital letter epsilon, U+0395 --&gt;</a>
+<span class="sourceLineNo">164</span><a id="line.164">        initialMap.put("\u0396", "&amp;Zeta;"); // greek capital letter zeta, U+0396 --&gt;</a>
+<span class="sourceLineNo">165</span><a id="line.165">        initialMap.put("\u0397", "&amp;Eta;"); // greek capital letter eta, U+0397 --&gt;</a>
+<span class="sourceLineNo">166</span><a id="line.166">        initialMap.put("\u0398", "&amp;Theta;"); // greek capital letter theta,U+0398 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">167</span><a id="line.167">        initialMap.put("\u0399", "&amp;Iota;"); // greek capital letter iota, U+0399 --&gt;</a>
+<span class="sourceLineNo">168</span><a id="line.168">        initialMap.put("\u039A", "&amp;Kappa;"); // greek capital letter kappa, U+039A --&gt;</a>
+<span class="sourceLineNo">169</span><a id="line.169">        initialMap.put("\u039B", "&amp;Lambda;"); // greek capital letter lambda,U+039B ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">170</span><a id="line.170">        initialMap.put("\u039C", "&amp;Mu;"); // greek capital letter mu, U+039C --&gt;</a>
+<span class="sourceLineNo">171</span><a id="line.171">        initialMap.put("\u039D", "&amp;Nu;"); // greek capital letter nu, U+039D --&gt;</a>
+<span class="sourceLineNo">172</span><a id="line.172">        initialMap.put("\u039E", "&amp;Xi;"); // greek capital letter xi, U+039E ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">173</span><a id="line.173">        initialMap.put("\u039F", "&amp;Omicron;"); // greek capital letter omicron, U+039F --&gt;</a>
+<span class="sourceLineNo">174</span><a id="line.174">        initialMap.put("\u03A0", "&amp;Pi;"); // greek capital letter pi, U+03A0 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">175</span><a id="line.175">        initialMap.put("\u03A1", "&amp;Rho;"); // greek capital letter rho, U+03A1 --&gt;</a>
+<span class="sourceLineNo">176</span><a id="line.176">        // &lt;!-- there is no Sigmaf, and no U+03A2 character either --&gt;</a>
+<span class="sourceLineNo">177</span><a id="line.177">        initialMap.put("\u03A3", "&amp;Sigma;"); // greek capital letter sigma,U+03A3 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">178</span><a id="line.178">        initialMap.put("\u03A4", "&amp;Tau;"); // greek capital letter tau, U+03A4 --&gt;</a>
+<span class="sourceLineNo">179</span><a id="line.179">        initialMap.put("\u03A5", "&amp;Upsilon;"); // greek capital letter upsilon,U+03A5 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">180</span><a id="line.180">        initialMap.put("\u03A6", "&amp;Phi;"); // greek capital letter phi,U+03A6 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">181</span><a id="line.181">        initialMap.put("\u03A7", "&amp;Chi;"); // greek capital letter chi, U+03A7 --&gt;</a>
+<span class="sourceLineNo">182</span><a id="line.182">        initialMap.put("\u03A8", "&amp;Psi;"); // greek capital letter psi,U+03A8 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">183</span><a id="line.183">        initialMap.put("\u03A9", "&amp;Omega;"); // greek capital letter omega,U+03A9 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">184</span><a id="line.184">        initialMap.put("\u03B1", "&amp;alpha;"); // greek small letter alpha,U+03B1 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">185</span><a id="line.185">        initialMap.put("\u03B2", "&amp;beta;"); // greek small letter beta, U+03B2 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">186</span><a id="line.186">        initialMap.put("\u03B3", "&amp;gamma;"); // greek small letter gamma,U+03B3 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">187</span><a id="line.187">        initialMap.put("\u03B4", "&amp;delta;"); // greek small letter delta,U+03B4 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">188</span><a id="line.188">        initialMap.put("\u03B5", "&amp;epsilon;"); // greek small letter epsilon,U+03B5 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">189</span><a id="line.189">        initialMap.put("\u03B6", "&amp;zeta;"); // greek small letter zeta, U+03B6 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">190</span><a id="line.190">        initialMap.put("\u03B7", "&amp;eta;"); // greek small letter eta, U+03B7 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">191</span><a id="line.191">        initialMap.put("\u03B8", "&amp;theta;"); // greek small letter theta,U+03B8 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">192</span><a id="line.192">        initialMap.put("\u03B9", "&amp;iota;"); // greek small letter iota, U+03B9 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">193</span><a id="line.193">        initialMap.put("\u03BA", "&amp;kappa;"); // greek small letter kappa,U+03BA ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">194</span><a id="line.194">        initialMap.put("\u03BB", "&amp;lambda;"); // greek small letter lambda,U+03BB ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">195</span><a id="line.195">        initialMap.put("\u03BC", "&amp;mu;"); // greek small letter mu, U+03BC ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">196</span><a id="line.196">        initialMap.put("\u03BD", "&amp;nu;"); // greek small letter nu, U+03BD ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">197</span><a id="line.197">        initialMap.put("\u03BE", "&amp;xi;"); // greek small letter xi, U+03BE ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">198</span><a id="line.198">        initialMap.put("\u03BF", "&amp;omicron;"); // greek small letter omicron, U+03BF NEW --&gt;</a>
+<span class="sourceLineNo">199</span><a id="line.199">        initialMap.put("\u03C0", "&amp;pi;"); // greek small letter pi, U+03C0 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">200</span><a id="line.200">        initialMap.put("\u03C1", "&amp;rho;"); // greek small letter rho, U+03C1 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">201</span><a id="line.201">        initialMap.put("\u03C2", "&amp;sigmaf;"); // greek small letter final sigma,U+03C2 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">202</span><a id="line.202">        initialMap.put("\u03C3", "&amp;sigma;"); // greek small letter sigma,U+03C3 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">203</span><a id="line.203">        initialMap.put("\u03C4", "&amp;tau;"); // greek small letter tau, U+03C4 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">204</span><a id="line.204">        initialMap.put("\u03C5", "&amp;upsilon;"); // greek small letter upsilon,U+03C5 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">205</span><a id="line.205">        initialMap.put("\u03C6", "&amp;phi;"); // greek small letter phi, U+03C6 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">206</span><a id="line.206">        initialMap.put("\u03C7", "&amp;chi;"); // greek small letter chi, U+03C7 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">207</span><a id="line.207">        initialMap.put("\u03C8", "&amp;psi;"); // greek small letter psi, U+03C8 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">208</span><a id="line.208">        initialMap.put("\u03C9", "&amp;omega;"); // greek small letter omega,U+03C9 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">209</span><a id="line.209">        initialMap.put("\u03D1", "&amp;thetasym;"); // greek small letter theta symbol,U+03D1 NEW --&gt;</a>
+<span class="sourceLineNo">210</span><a id="line.210">        initialMap.put("\u03D2", "&amp;upsih;"); // greek upsilon with hook symbol,U+03D2 NEW --&gt;</a>
+<span class="sourceLineNo">211</span><a id="line.211">        initialMap.put("\u03D6", "&amp;piv;"); // greek pi symbol, U+03D6 ISOgrk3 --&gt;</a>
+<span class="sourceLineNo">212</span><a id="line.212">        // &lt;!-- General Punctuation --&gt;</a>
+<span class="sourceLineNo">213</span><a id="line.213">        initialMap.put("\u2022", "&amp;bull;"); // bullet = black small circle,U+2022 ISOpub --&gt;</a>
+<span class="sourceLineNo">214</span><a id="line.214">        // &lt;!-- bullet is NOT the same as bullet operator, U+2219 --&gt;</a>
+<span class="sourceLineNo">215</span><a id="line.215">        initialMap.put("\u2026", "&amp;hellip;"); // horizontal ellipsis = three dot leader,U+2026 ISOpub --&gt;</a>
+<span class="sourceLineNo">216</span><a id="line.216">        initialMap.put("\u2032", "&amp;prime;"); // prime = minutes = feet, U+2032 ISOtech --&gt;</a>
+<span class="sourceLineNo">217</span><a id="line.217">        initialMap.put("\u2033", "&amp;Prime;"); // double prime = seconds = inches,U+2033 ISOtech --&gt;</a>
+<span class="sourceLineNo">218</span><a id="line.218">        initialMap.put("\u203E", "&amp;oline;"); // overline = spacing overscore,U+203E NEW --&gt;</a>
+<span class="sourceLineNo">219</span><a id="line.219">        initialMap.put("\u2044", "&amp;frasl;"); // fraction slash, U+2044 NEW --&gt;</a>
+<span class="sourceLineNo">220</span><a id="line.220">        // &lt;!-- Letterlike Symbols --&gt;</a>
+<span class="sourceLineNo">221</span><a id="line.221">        initialMap.put("\u2118", "&amp;weierp;"); // script capital P = power set= Weierstrass p, U+2118 ISOamso --&gt;</a>
+<span class="sourceLineNo">222</span><a id="line.222">        initialMap.put("\u2111", "&amp;image;"); // blackletter capital I = imaginary part,U+2111 ISOamso --&gt;</a>
+<span class="sourceLineNo">223</span><a id="line.223">        initialMap.put("\u211C", "&amp;real;"); // blackletter capital R = real part symbol,U+211C ISOamso --&gt;</a>
+<span class="sourceLineNo">224</span><a id="line.224">        initialMap.put("\u2122", "&amp;trade;"); // trade mark sign, U+2122 ISOnum --&gt;</a>
+<span class="sourceLineNo">225</span><a id="line.225">        initialMap.put("\u2135", "&amp;alefsym;"); // alef symbol = first transfinite cardinal,U+2135 NEW --&gt;</a>
+<span class="sourceLineNo">226</span><a id="line.226">        // &lt;!-- alef symbol is NOT the same as hebrew letter alef,U+05D0 although the</a>
+<span class="sourceLineNo">227</span><a id="line.227">        // same glyph could be used to depict both characters --&gt;</a>
+<span class="sourceLineNo">228</span><a id="line.228">        // &lt;!-- Arrows --&gt;</a>
+<span class="sourceLineNo">229</span><a id="line.229">        initialMap.put("\u2190", "&amp;larr;"); // leftwards arrow, U+2190 ISOnum --&gt;</a>
+<span class="sourceLineNo">230</span><a id="line.230">        initialMap.put("\u2191", "&amp;uarr;"); // upwards arrow, U+2191 ISOnum--&gt;</a>
+<span class="sourceLineNo">231</span><a id="line.231">        initialMap.put("\u2192", "&amp;rarr;"); // rightwards arrow, U+2192 ISOnum --&gt;</a>
+<span class="sourceLineNo">232</span><a id="line.232">        initialMap.put("\u2193", "&amp;darr;"); // downwards arrow, U+2193 ISOnum --&gt;</a>
+<span class="sourceLineNo">233</span><a id="line.233">        initialMap.put("\u2194", "&amp;harr;"); // left right arrow, U+2194 ISOamsa --&gt;</a>
+<span class="sourceLineNo">234</span><a id="line.234">        initialMap.put("\u21B5", "&amp;crarr;"); // downwards arrow with corner leftwards= carriage return, U+21B5 NEW --&gt;</a>
+<span class="sourceLineNo">235</span><a id="line.235">        initialMap.put("\u21D0", "&amp;lArr;"); // leftwards double arrow, U+21D0 ISOtech --&gt;</a>
+<span class="sourceLineNo">236</span><a id="line.236">        // &lt;!-- ISO 10646 does not say that lArr is the same as the 'is implied by'</a>
+<span class="sourceLineNo">237</span><a id="line.237">        // arrow but also does not have any other character for that function.</a>
+<span class="sourceLineNo">238</span><a id="line.238">        // So ? lArr canbe used for 'is implied by' as ISOtech suggests --&gt;</a>
+<span class="sourceLineNo">239</span><a id="line.239">        initialMap.put("\u21D1", "&amp;uArr;"); // upwards double arrow, U+21D1 ISOamsa --&gt;</a>
+<span class="sourceLineNo">240</span><a id="line.240">        initialMap.put("\u21D2", "&amp;rArr;"); // rightwards double arrow,U+21D2 ISOtech --&gt;</a>
+<span class="sourceLineNo">241</span><a id="line.241">        // &lt;!-- ISO 10646 does not say this is the 'implies' character but does not</a>
+<span class="sourceLineNo">242</span><a id="line.242">        // have another character with this function so ?rArr can be used for</a>
+<span class="sourceLineNo">243</span><a id="line.243">        // 'implies' as ISOtech suggests --&gt;</a>
+<span class="sourceLineNo">244</span><a id="line.244">        initialMap.put("\u21D3", "&amp;dArr;"); // downwards double arrow, U+21D3 ISOamsa --&gt;</a>
+<span class="sourceLineNo">245</span><a id="line.245">        initialMap.put("\u21D4", "&amp;hArr;"); // left right double arrow,U+21D4 ISOamsa --&gt;</a>
+<span class="sourceLineNo">246</span><a id="line.246">        // &lt;!-- Mathematical Operators --&gt;</a>
+<span class="sourceLineNo">247</span><a id="line.247">        initialMap.put("\u2200", "&amp;forall;"); // for all, U+2200 ISOtech --&gt;</a>
+<span class="sourceLineNo">248</span><a id="line.248">        initialMap.put("\u2202", "&amp;part;"); // partial differential, U+2202 ISOtech --&gt;</a>
+<span class="sourceLineNo">249</span><a id="line.249">        initialMap.put("\u2203", "&amp;exist;"); // there exists, U+2203 ISOtech --&gt;</a>
+<span class="sourceLineNo">250</span><a id="line.250">        initialMap.put("\u2205", "&amp;empty;"); // empty set = null set = diameter,U+2205 ISOamso --&gt;</a>
+<span class="sourceLineNo">251</span><a id="line.251">        initialMap.put("\u2207", "&amp;nabla;"); // nabla = backward difference,U+2207 ISOtech --&gt;</a>
+<span class="sourceLineNo">252</span><a id="line.252">        initialMap.put("\u2208", "&amp;isin;"); // element of, U+2208 ISOtech --&gt;</a>
+<span class="sourceLineNo">253</span><a id="line.253">        initialMap.put("\u2209", "&amp;notin;"); // not an element of, U+2209 ISOtech --&gt;</a>
+<span class="sourceLineNo">254</span><a id="line.254">        initialMap.put("\u220B", "&amp;ni;"); // contains as member, U+220B ISOtech --&gt;</a>
+<span class="sourceLineNo">255</span><a id="line.255">        // &lt;!-- should there be a more memorable name than 'ni'? --&gt;</a>
+<span class="sourceLineNo">256</span><a id="line.256">        initialMap.put("\u220F", "&amp;prod;"); // n-ary product = product sign,U+220F ISOamsb --&gt;</a>
+<span class="sourceLineNo">257</span><a id="line.257">        // &lt;!-- prod is NOT the same character as U+03A0 'greek capital letter pi'</a>
+<span class="sourceLineNo">258</span><a id="line.258">        // though the same glyph might be used for both --&gt;</a>
+<span class="sourceLineNo">259</span><a id="line.259">        initialMap.put("\u2211", "&amp;sum;"); // n-ary summation, U+2211 ISOamsb --&gt;</a>
+<span class="sourceLineNo">260</span><a id="line.260">        // &lt;!-- sum is NOT the same character as U+03A3 'greek capital letter sigma'</a>
+<span class="sourceLineNo">261</span><a id="line.261">        // though the same glyph might be used for both --&gt;</a>
+<span class="sourceLineNo">262</span><a id="line.262">        initialMap.put("\u2212", "&amp;minus;"); // minus sign, U+2212 ISOtech --&gt;</a>
+<span class="sourceLineNo">263</span><a id="line.263">        initialMap.put("\u2217", "&amp;lowast;"); // asterisk operator, U+2217 ISOtech --&gt;</a>
+<span class="sourceLineNo">264</span><a id="line.264">        initialMap.put("\u221A", "&amp;radic;"); // square root = radical sign,U+221A ISOtech --&gt;</a>
+<span class="sourceLineNo">265</span><a id="line.265">        initialMap.put("\u221D", "&amp;prop;"); // proportional to, U+221D ISOtech --&gt;</a>
+<span class="sourceLineNo">266</span><a id="line.266">        initialMap.put("\u221E", "&amp;infin;"); // infinity, U+221E ISOtech --&gt;</a>
+<span class="sourceLineNo">267</span><a id="line.267">        initialMap.put("\u2220", "&amp;ang;"); // angle, U+2220 ISOamso --&gt;</a>
+<span class="sourceLineNo">268</span><a id="line.268">        initialMap.put("\u2227", "&amp;and;"); // logical and = wedge, U+2227 ISOtech --&gt;</a>
+<span class="sourceLineNo">269</span><a id="line.269">        initialMap.put("\u2228", "&amp;or;"); // logical or = vee, U+2228 ISOtech --&gt;</a>
+<span class="sourceLineNo">270</span><a id="line.270">        initialMap.put("\u2229", "&amp;cap;"); // intersection = cap, U+2229 ISOtech --&gt;</a>
+<span class="sourceLineNo">271</span><a id="line.271">        initialMap.put("\u222A", "&amp;cup;"); // union = cup, U+222A ISOtech --&gt;</a>
+<span class="sourceLineNo">272</span><a id="line.272">        initialMap.put("\u222B", "&amp;int;"); // integral, U+222B ISOtech --&gt;</a>
+<span class="sourceLineNo">273</span><a id="line.273">        initialMap.put("\u2234", "&amp;there4;"); // therefore, U+2234 ISOtech --&gt;</a>
+<span class="sourceLineNo">274</span><a id="line.274">        initialMap.put("\u223C", "&amp;sim;"); // tilde operator = varies with = similar to,U+223C ISOtech --&gt;</a>
+<span class="sourceLineNo">275</span><a id="line.275">        // &lt;!-- tilde operator is NOT the same character as the tilde, U+007E,although</a>
+<span class="sourceLineNo">276</span><a id="line.276">        // the same glyph might be used to represent both --&gt;</a>
+<span class="sourceLineNo">277</span><a id="line.277">        initialMap.put("\u2245", "&amp;cong;"); // approximately equal to, U+2245 ISOtech --&gt;</a>
+<span class="sourceLineNo">278</span><a id="line.278">        initialMap.put("\u2248", "&amp;asymp;"); // almost equal to = asymptotic to,U+2248 ISOamsr --&gt;</a>
+<span class="sourceLineNo">279</span><a id="line.279">        initialMap.put("\u2260", "&amp;ne;"); // not equal to, U+2260 ISOtech --&gt;</a>
+<span class="sourceLineNo">280</span><a id="line.280">        initialMap.put("\u2261", "&amp;equiv;"); // identical to, U+2261 ISOtech --&gt;</a>
+<span class="sourceLineNo">281</span><a id="line.281">        initialMap.put("\u2264", "&amp;le;"); // less-than or equal to, U+2264 ISOtech --&gt;</a>
+<span class="sourceLineNo">282</span><a id="line.282">        initialMap.put("\u2265", "&amp;ge;"); // greater-than or equal to,U+2265 ISOtech --&gt;</a>
+<span class="sourceLineNo">283</span><a id="line.283">        initialMap.put("\u2282", "&amp;sub;"); // subset of, U+2282 ISOtech --&gt;</a>
+<span class="sourceLineNo">284</span><a id="line.284">        initialMap.put("\u2283", "&amp;sup;"); // superset of, U+2283 ISOtech --&gt;</a>
+<span class="sourceLineNo">285</span><a id="line.285">        // &lt;!-- note that nsup, 'not a superset of, U+2283' is not covered by the</a>
+<span class="sourceLineNo">286</span><a id="line.286">        // Symbol font encoding and is not included. Should it be, for symmetry?</a>
+<span class="sourceLineNo">287</span><a id="line.287">        // It is in ISOamsn --&gt;,</a>
+<span class="sourceLineNo">288</span><a id="line.288">        initialMap.put("\u2284", "&amp;nsub;"); // not a subset of, U+2284 ISOamsn --&gt;</a>
+<span class="sourceLineNo">289</span><a id="line.289">        initialMap.put("\u2286", "&amp;sube;"); // subset of or equal to, U+2286 ISOtech --&gt;</a>
+<span class="sourceLineNo">290</span><a id="line.290">        initialMap.put("\u2287", "&amp;supe;"); // superset of or equal to,U+2287 ISOtech --&gt;</a>
+<span class="sourceLineNo">291</span><a id="line.291">        initialMap.put("\u2295", "&amp;oplus;"); // circled plus = direct sum,U+2295 ISOamsb --&gt;</a>
+<span class="sourceLineNo">292</span><a id="line.292">        initialMap.put("\u2297", "&amp;otimes;"); // circled times = vector product,U+2297 ISOamsb --&gt;</a>
+<span class="sourceLineNo">293</span><a id="line.293">        initialMap.put("\u22A5", "&amp;perp;"); // up tack = orthogonal to = perpendicular,U+22A5 ISOtech --&gt;</a>
+<span class="sourceLineNo">294</span><a id="line.294">        initialMap.put("\u22C5", "&amp;sdot;"); // dot operator, U+22C5 ISOamsb --&gt;</a>
+<span class="sourceLineNo">295</span><a id="line.295">        // &lt;!-- dot operator is NOT the same character as U+00B7 middle dot --&gt;</a>
+<span class="sourceLineNo">296</span><a id="line.296">        // &lt;!-- Miscellaneous Technical --&gt;</a>
+<span class="sourceLineNo">297</span><a id="line.297">        initialMap.put("\u2308", "&amp;lceil;"); // left ceiling = apl upstile,U+2308 ISOamsc --&gt;</a>
+<span class="sourceLineNo">298</span><a id="line.298">        initialMap.put("\u2309", "&amp;rceil;"); // right ceiling, U+2309 ISOamsc --&gt;</a>
+<span class="sourceLineNo">299</span><a id="line.299">        initialMap.put("\u230A", "&amp;lfloor;"); // left floor = apl downstile,U+230A ISOamsc --&gt;</a>
+<span class="sourceLineNo">300</span><a id="line.300">        initialMap.put("\u230B", "&amp;rfloor;"); // right floor, U+230B ISOamsc --&gt;</a>
+<span class="sourceLineNo">301</span><a id="line.301">        initialMap.put("\u2329", "&amp;lang;"); // left-pointing angle bracket = bra,U+2329 ISOtech --&gt;</a>
+<span class="sourceLineNo">302</span><a id="line.302">        // &lt;!-- lang is NOT the same character as U+003C 'less than' or U+2039 'single left-pointing angle quotation</a>
+<span class="sourceLineNo">303</span><a id="line.303">        // mark' --&gt;</a>
+<span class="sourceLineNo">304</span><a id="line.304">        initialMap.put("\u232A", "&amp;rang;"); // right-pointing angle bracket = ket,U+232A ISOtech --&gt;</a>
+<span class="sourceLineNo">305</span><a id="line.305">        // &lt;!-- rang is NOT the same character as U+003E 'greater than' or U+203A</a>
+<span class="sourceLineNo">306</span><a id="line.306">        // 'single right-pointing angle quotation mark' --&gt;</a>
+<span class="sourceLineNo">307</span><a id="line.307">        // &lt;!-- Geometric Shapes --&gt;</a>
+<span class="sourceLineNo">308</span><a id="line.308">        initialMap.put("\u25CA", "&amp;loz;"); // lozenge, U+25CA ISOpub --&gt;</a>
+<span class="sourceLineNo">309</span><a id="line.309">        // &lt;!-- Miscellaneous Symbols --&gt;</a>
+<span class="sourceLineNo">310</span><a id="line.310">        initialMap.put("\u2660", "&amp;spades;"); // black spade suit, U+2660 ISOpub --&gt;</a>
+<span class="sourceLineNo">311</span><a id="line.311">        // &lt;!-- black here seems to mean filled as opposed to hollow --&gt;</a>
+<span class="sourceLineNo">312</span><a id="line.312">        initialMap.put("\u2663", "&amp;clubs;"); // black club suit = shamrock,U+2663 ISOpub --&gt;</a>
+<span class="sourceLineNo">313</span><a id="line.313">        initialMap.put("\u2665", "&amp;hearts;"); // black heart suit = valentine,U+2665 ISOpub --&gt;</a>
+<span class="sourceLineNo">314</span><a id="line.314">        initialMap.put("\u2666", "&amp;diams;"); // black diamond suit, U+2666 ISOpub --&gt;</a>
+<span class="sourceLineNo">315</span><a id="line.315"></a>
+<span class="sourceLineNo">316</span><a id="line.316">        // &lt;!-- Latin Extended-A --&gt;</a>
+<span class="sourceLineNo">317</span><a id="line.317">        initialMap.put("\u0152", "&amp;OElig;"); // -- latin capital ligature OE,U+0152 ISOlat2 --&gt;</a>
+<span class="sourceLineNo">318</span><a id="line.318">        initialMap.put("\u0153", "&amp;oelig;"); // -- latin small ligature oe, U+0153 ISOlat2 --&gt;</a>
+<span class="sourceLineNo">319</span><a id="line.319">        // &lt;!-- ligature is a misnomer, this is a separate character in some languages --&gt;</a>
+<span class="sourceLineNo">320</span><a id="line.320">        initialMap.put("\u0160", "&amp;Scaron;"); // -- latin capital letter S with caron,U+0160 ISOlat2 --&gt;</a>
+<span class="sourceLineNo">321</span><a id="line.321">        initialMap.put("\u0161", "&amp;scaron;"); // -- latin small letter s with caron,U+0161 ISOlat2 --&gt;</a>
+<span class="sourceLineNo">322</span><a id="line.322">        initialMap.put("\u0178", "&amp;Yuml;"); // -- latin capital letter Y with diaeresis,U+0178 ISOlat2 --&gt;</a>
+<span class="sourceLineNo">323</span><a id="line.323">        // &lt;!-- Spacing Modifier Letters --&gt;</a>
+<span class="sourceLineNo">324</span><a id="line.324">        initialMap.put("\u02C6", "&amp;circ;"); // -- modifier letter circumflex accent,U+02C6 ISOpub --&gt;</a>
+<span class="sourceLineNo">325</span><a id="line.325">        initialMap.put("\u02DC", "&amp;tilde;"); // small tilde, U+02DC ISOdia --&gt;</a>
+<span class="sourceLineNo">326</span><a id="line.326">        // &lt;!-- General Punctuation --&gt;</a>
+<span class="sourceLineNo">327</span><a id="line.327">        initialMap.put("\u2002", "&amp;ensp;"); // en space, U+2002 ISOpub --&gt;</a>
+<span class="sourceLineNo">328</span><a id="line.328">        initialMap.put("\u2003", "&amp;emsp;"); // em space, U+2003 ISOpub --&gt;</a>
+<span class="sourceLineNo">329</span><a id="line.329">        initialMap.put("\u2009", "&amp;thinsp;"); // thin space, U+2009 ISOpub --&gt;</a>
+<span class="sourceLineNo">330</span><a id="line.330">        initialMap.put("\u200C", "&amp;zwnj;"); // zero width non-joiner,U+200C NEW RFC 2070 --&gt;</a>
+<span class="sourceLineNo">331</span><a id="line.331">        initialMap.put("\u200D", "&amp;zwj;"); // zero width joiner, U+200D NEW RFC 2070 --&gt;</a>
+<span class="sourceLineNo">332</span><a id="line.332">        initialMap.put("\u200E", "&amp;lrm;"); // left-to-right mark, U+200E NEW RFC 2070 --&gt;</a>
+<span class="sourceLineNo">333</span><a id="line.333">        initialMap.put("\u200F", "&amp;rlm;"); // right-to-left mark, U+200F NEW RFC 2070 --&gt;</a>
+<span class="sourceLineNo">334</span><a id="line.334">        initialMap.put("\u2013", "&amp;ndash;"); // en dash, U+2013 ISOpub --&gt;</a>
+<span class="sourceLineNo">335</span><a id="line.335">        initialMap.put("\u2014", "&amp;mdash;"); // em dash, U+2014 ISOpub --&gt;</a>
+<span class="sourceLineNo">336</span><a id="line.336">        initialMap.put("\u2018", "&amp;lsquo;"); // left single quotation mark,U+2018 ISOnum --&gt;</a>
+<span class="sourceLineNo">337</span><a id="line.337">        initialMap.put("\u2019", "&amp;rsquo;"); // right single quotation mark,U+2019 ISOnum --&gt;</a>
+<span class="sourceLineNo">338</span><a id="line.338">        initialMap.put("\u201A", "&amp;sbquo;"); // single low-9 quotation mark, U+201A NEW --&gt;</a>
+<span class="sourceLineNo">339</span><a id="line.339">        initialMap.put("\u201C", "&amp;ldquo;"); // left double quotation mark,U+201C ISOnum --&gt;</a>
+<span class="sourceLineNo">340</span><a id="line.340">        initialMap.put("\u201D", "&amp;rdquo;"); // right double quotation mark,U+201D ISOnum --&gt;</a>
+<span class="sourceLineNo">341</span><a id="line.341">        initialMap.put("\u201E", "&amp;bdquo;"); // double low-9 quotation mark, U+201E NEW --&gt;</a>
+<span class="sourceLineNo">342</span><a id="line.342">        initialMap.put("\u2020", "&amp;dagger;"); // dagger, U+2020 ISOpub --&gt;</a>
+<span class="sourceLineNo">343</span><a id="line.343">        initialMap.put("\u2021", "&amp;Dagger;"); // double dagger, U+2021 ISOpub --&gt;</a>
+<span class="sourceLineNo">344</span><a id="line.344">        initialMap.put("\u2030", "&amp;permil;"); // per mille sign, U+2030 ISOtech --&gt;</a>
+<span class="sourceLineNo">345</span><a id="line.345">        initialMap.put("\u2039", "&amp;lsaquo;"); // single left-pointing angle quotation mark,U+2039 ISO proposed --&gt;</a>
+<span class="sourceLineNo">346</span><a id="line.346">        // &lt;!-- lsaquo is proposed but not yet ISO standardized --&gt;</a>
+<span class="sourceLineNo">347</span><a id="line.347">        initialMap.put("\u203A", "&amp;rsaquo;"); // single right-pointing angle quotation mark,U+203A ISO proposed --&gt;</a>
+<span class="sourceLineNo">348</span><a id="line.348">        // &lt;!-- rsaquo is proposed but not yet ISO standardized --&gt;</a>
+<span class="sourceLineNo">349</span><a id="line.349">        initialMap.put("\u20AC", "&amp;euro;"); // -- euro sign, U+20AC NEW --&gt;</a>
+<span class="sourceLineNo">350</span><a id="line.350">        HTML40_EXTENDED_ESCAPE = Collections.unmodifiableMap(initialMap);</a>
+<span class="sourceLineNo">351</span><a id="line.351">    }</a>
+<span class="sourceLineNo">352</span><a id="line.352"></a>
+<span class="sourceLineNo">353</span><a id="line.353">    /**</a>
+<span class="sourceLineNo">354</span><a id="line.354">     * Reverse of {@link #HTML40_EXTENDED_ESCAPE} for unescaping purposes.</a>
+<span class="sourceLineNo">355</span><a id="line.355">     */</a>
+<span class="sourceLineNo">356</span><a id="line.356">    public static final Map&lt;CharSequence, CharSequence&gt; HTML40_EXTENDED_UNESCAPE;</a>
+<span class="sourceLineNo">357</span><a id="line.357">    static {</a>
+<span class="sourceLineNo">358</span><a id="line.358">        HTML40_EXTENDED_UNESCAPE = Collections.unmodifiableMap(invert(HTML40_EXTENDED_ESCAPE));</a>
+<span class="sourceLineNo">359</span><a id="line.359">    }</a>
+<span class="sourceLineNo">360</span><a id="line.360"></a>
+<span class="sourceLineNo">361</span><a id="line.361">    /**</a>
+<span class="sourceLineNo">362</span><a id="line.362">     * A Map&amp;lt;CharSequence, CharSequence&amp;gt; to escape the basic XML and HTML</a>
+<span class="sourceLineNo">363</span><a id="line.363">     * character entities.</a>
+<span class="sourceLineNo">364</span><a id="line.364">     *</a>
+<span class="sourceLineNo">365</span><a id="line.365">     * Namely: {@code " &amp; &lt; &gt;}</a>
+<span class="sourceLineNo">366</span><a id="line.366">     */</a>
+<span class="sourceLineNo">367</span><a id="line.367">    public static final Map&lt;CharSequence, CharSequence&gt; BASIC_ESCAPE;</a>
+<span class="sourceLineNo">368</span><a id="line.368">    static {</a>
+<span class="sourceLineNo">369</span><a id="line.369">        final Map&lt;CharSequence, CharSequence&gt; initialMap = new HashMap&lt;&gt;();</a>
+<span class="sourceLineNo">370</span><a id="line.370">        initialMap.put("\"", "&amp;quot;"); // " - double-quote</a>
+<span class="sourceLineNo">371</span><a id="line.371">        initialMap.put("&amp;", "&amp;amp;");   // &amp; - ampersand</a>
+<span class="sourceLineNo">372</span><a id="line.372">        initialMap.put("&lt;", "&amp;lt;");    // &lt; - less-than</a>
+<span class="sourceLineNo">373</span><a id="line.373">        initialMap.put("&gt;", "&amp;gt;");    // &gt; - greater-than</a>
+<span class="sourceLineNo">374</span><a id="line.374">        BASIC_ESCAPE = Collections.unmodifiableMap(initialMap);</a>
+<span class="sourceLineNo">375</span><a id="line.375">    }</a>
+<span class="sourceLineNo">376</span><a id="line.376"></a>
+<span class="sourceLineNo">377</span><a id="line.377">    /**</a>
+<span class="sourceLineNo">378</span><a id="line.378">     * Reverse of {@link #BASIC_ESCAPE} for unescaping purposes.</a>
+<span class="sourceLineNo">379</span><a id="line.379">     */</a>
+<span class="sourceLineNo">380</span><a id="line.380">    public static final Map&lt;CharSequence, CharSequence&gt; BASIC_UNESCAPE;</a>
+<span class="sourceLineNo">381</span><a id="line.381">    static {</a>
+<span class="sourceLineNo">382</span><a id="line.382">        BASIC_UNESCAPE = Collections.unmodifiableMap(invert(BASIC_ESCAPE));</a>
+<span class="sourceLineNo">383</span><a id="line.383">    }</a>
+<span class="sourceLineNo">384</span><a id="line.384"></a>
+<span class="sourceLineNo">385</span><a id="line.385">    /**</a>
+<span class="sourceLineNo">386</span><a id="line.386">     * A Map&amp;lt;CharSequence, CharSequence&amp;gt; to escape the apostrophe character to</a>
+<span class="sourceLineNo">387</span><a id="line.387">     * its XML character entity.</a>
+<span class="sourceLineNo">388</span><a id="line.388">     */</a>
+<span class="sourceLineNo">389</span><a id="line.389">    public static final Map&lt;CharSequence, CharSequence&gt; APOS_ESCAPE;</a>
+<span class="sourceLineNo">390</span><a id="line.390">    static {</a>
+<span class="sourceLineNo">391</span><a id="line.391">        final Map&lt;CharSequence, CharSequence&gt; initialMap = new HashMap&lt;&gt;();</a>
+<span class="sourceLineNo">392</span><a id="line.392">        initialMap.put("'", "&amp;apos;"); // XML apostrophe</a>
+<span class="sourceLineNo">393</span><a id="line.393">        APOS_ESCAPE = Collections.unmodifiableMap(initialMap);</a>
+<span class="sourceLineNo">394</span><a id="line.394">    }</a>
+<span class="sourceLineNo">395</span><a id="line.395"></a>
+<span class="sourceLineNo">396</span><a id="line.396">    /**</a>
+<span class="sourceLineNo">397</span><a id="line.397">     * Reverse of {@link #APOS_ESCAPE} for unescaping purposes.</a>
+<span class="sourceLineNo">398</span><a id="line.398">     */</a>
+<span class="sourceLineNo">399</span><a id="line.399">    public static final Map&lt;CharSequence, CharSequence&gt; APOS_UNESCAPE;</a>
+<span class="sourceLineNo">400</span><a id="line.400">    static {</a>
+<span class="sourceLineNo">401</span><a id="line.401">        APOS_UNESCAPE = Collections.unmodifiableMap(invert(APOS_ESCAPE));</a>
+<span class="sourceLineNo">402</span><a id="line.402">    }</a>
+<span class="sourceLineNo">403</span><a id="line.403"></a>
+<span class="sourceLineNo">404</span><a id="line.404">    /**</a>
+<span class="sourceLineNo">405</span><a id="line.405">     * A Map&amp;lt;CharSequence, CharSequence&amp;gt; to escape the Java</a>
+<span class="sourceLineNo">406</span><a id="line.406">     * control characters.</a>
+<span class="sourceLineNo">407</span><a id="line.407">     *</a>
+<span class="sourceLineNo">408</span><a id="line.408">     * Namely: {@code \b \n \t \f \r}</a>
+<span class="sourceLineNo">409</span><a id="line.409">     */</a>
+<span class="sourceLineNo">410</span><a id="line.410">    public static final Map&lt;CharSequence, CharSequence&gt; JAVA_CTRL_CHARS_ESCAPE;</a>
+<span class="sourceLineNo">411</span><a id="line.411">    static {</a>
+<span class="sourceLineNo">412</span><a id="line.412">        final Map&lt;CharSequence, CharSequence&gt; initialMap = new HashMap&lt;&gt;();</a>
+<span class="sourceLineNo">413</span><a id="line.413">        initialMap.put("\b", "\\b");</a>
+<span class="sourceLineNo">414</span><a id="line.414">        initialMap.put("\n", "\\n");</a>
+<span class="sourceLineNo">415</span><a id="line.415">        initialMap.put("\t", "\\t");</a>
+<span class="sourceLineNo">416</span><a id="line.416">        initialMap.put("\f", "\\f");</a>
+<span class="sourceLineNo">417</span><a id="line.417">        initialMap.put("\r", "\\r");</a>
+<span class="sourceLineNo">418</span><a id="line.418">        JAVA_CTRL_CHARS_ESCAPE = Collections.unmodifiableMap(initialMap);</a>
+<span class="sourceLineNo">419</span><a id="line.419">    }</a>
+<span class="sourceLineNo">420</span><a id="line.420"></a>
+<span class="sourceLineNo">421</span><a id="line.421">    /**</a>
+<span class="sourceLineNo">422</span><a id="line.422">     * Reverse of {@link #JAVA_CTRL_CHARS_ESCAPE} for unescaping purposes.</a>
+<span class="sourceLineNo">423</span><a id="line.423">     */</a>
+<span class="sourceLineNo">424</span><a id="line.424">    public static final Map&lt;CharSequence, CharSequence&gt; JAVA_CTRL_CHARS_UNESCAPE;</a>
+<span class="sourceLineNo">425</span><a id="line.425">    static {</a>
+<span class="sourceLineNo">426</span><a id="line.426">        JAVA_CTRL_CHARS_UNESCAPE = Collections.unmodifiableMap(invert(JAVA_CTRL_CHARS_ESCAPE));</a>
+<span class="sourceLineNo">427</span><a id="line.427">    }</a>
+<span class="sourceLineNo">428</span><a id="line.428"></a>
+<span class="sourceLineNo">429</span><a id="line.429">    /**</a>
+<span class="sourceLineNo">430</span><a id="line.430">     * Used to invert an escape Map into an unescape Map.</a>
+<span class="sourceLineNo">431</span><a id="line.431">     * @param map Map&amp;lt;String, String&amp;gt; to be inverted</a>
+<span class="sourceLineNo">432</span><a id="line.432">     * @return Map&amp;lt;String, String&amp;gt; inverted array</a>
+<span class="sourceLineNo">433</span><a id="line.433">     */</a>
+<span class="sourceLineNo">434</span><a id="line.434">    public static Map&lt;CharSequence, CharSequence&gt; invert(final Map&lt;CharSequence, CharSequence&gt; map) {</a>
+<span class="sourceLineNo">435</span><a id="line.435">        final Map&lt;CharSequence, CharSequence&gt; newMap = new HashMap&lt;&gt;();</a>
+<span class="sourceLineNo">436</span><a id="line.436">        for (final Map.Entry&lt;CharSequence, CharSequence&gt; pair : map.entrySet()) {</a>
+<span class="sourceLineNo">437</span><a id="line.437">            newMap.put(pair.getValue(), pair.getKey());</a>
+<span class="sourceLineNo">438</span><a id="line.438">        }</a>
+<span class="sourceLineNo">439</span><a id="line.439">        return newMap;</a>
+<span class="sourceLineNo">440</span><a id="line.440">    }</a>
+<span class="sourceLineNo">441</span><a id="line.441"></a>
+<span class="sourceLineNo">442</span><a id="line.442">}</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</main>
+</body>
+</html>

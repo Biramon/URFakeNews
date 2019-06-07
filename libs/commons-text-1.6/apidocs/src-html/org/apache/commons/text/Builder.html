@@ -1,0 +1,162 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<main role="main">
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a id="line.1">/*</a>
+<span class="sourceLineNo">002</span><a id="line.2"> * Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<span class="sourceLineNo">003</span><a id="line.3"> * contributor license agreements.  See the NOTICE file distributed with</a>
+<span class="sourceLineNo">004</span><a id="line.4"> * this work for additional information regarding copyright ownership.</a>
+<span class="sourceLineNo">005</span><a id="line.5"> * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<span class="sourceLineNo">006</span><a id="line.6"> * (the "License"); you may not use this file except in compliance with</a>
+<span class="sourceLineNo">007</span><a id="line.7"> * the License.  You may obtain a copy of the License at</a>
+<span class="sourceLineNo">008</span><a id="line.8"> *</a>
+<span class="sourceLineNo">009</span><a id="line.9"> *      http://www.apache.org/licenses/LICENSE-2.0</a>
+<span class="sourceLineNo">010</span><a id="line.10"> *</a>
+<span class="sourceLineNo">011</span><a id="line.11"> * Unless required by applicable law or agreed to in writing, software</a>
+<span class="sourceLineNo">012</span><a id="line.12"> * distributed under the License is distributed on an "AS IS" BASIS,</a>
+<span class="sourceLineNo">013</span><a id="line.13"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<span class="sourceLineNo">014</span><a id="line.14"> * See the License for the specific language governing permissions and</a>
+<span class="sourceLineNo">015</span><a id="line.15"> * limitations under the License.</a>
+<span class="sourceLineNo">016</span><a id="line.16"> */</a>
+<span class="sourceLineNo">017</span><a id="line.17">package org.apache.commons.text;</a>
+<span class="sourceLineNo">018</span><a id="line.18"></a>
+<span class="sourceLineNo">019</span><a id="line.19">/**</a>
+<span class="sourceLineNo">020</span><a id="line.20"> * &lt;p&gt;</a>
+<span class="sourceLineNo">021</span><a id="line.21"> * The Builder interface is designed to designate a class as a &lt;em&gt;builder&lt;/em&gt;</a>
+<span class="sourceLineNo">022</span><a id="line.22"> * object in the Builder design pattern. Builders are capable of creating and</a>
+<span class="sourceLineNo">023</span><a id="line.23"> * configuring objects or results that normally take multiple steps to construct</a>
+<span class="sourceLineNo">024</span><a id="line.24"> * or are very complex to derive.</a>
+<span class="sourceLineNo">025</span><a id="line.25"> * &lt;/p&gt;</a>
+<span class="sourceLineNo">026</span><a id="line.26"> *</a>
+<span class="sourceLineNo">027</span><a id="line.27"> * &lt;p&gt;</a>
+<span class="sourceLineNo">028</span><a id="line.28"> * The builder interface defines a single method, {@link #build()}, that</a>
+<span class="sourceLineNo">029</span><a id="line.29"> * classes must implement. The result of this method should be the final</a>
+<span class="sourceLineNo">030</span><a id="line.30"> * configured object or result after all building operations are performed.</a>
+<span class="sourceLineNo">031</span><a id="line.31"> * &lt;/p&gt;</a>
+<span class="sourceLineNo">032</span><a id="line.32"> *</a>
+<span class="sourceLineNo">033</span><a id="line.33"> * &lt;p&gt;</a>
+<span class="sourceLineNo">034</span><a id="line.34"> * It is a recommended practice that the methods supplied to configure the</a>
+<span class="sourceLineNo">035</span><a id="line.35"> * object or result being built return a reference to {@code this} so that</a>
+<span class="sourceLineNo">036</span><a id="line.36"> * method calls can be chained together.</a>
+<span class="sourceLineNo">037</span><a id="line.37"> * &lt;/p&gt;</a>
+<span class="sourceLineNo">038</span><a id="line.38"> *</a>
+<span class="sourceLineNo">039</span><a id="line.39"> * &lt;p&gt;</a>
+<span class="sourceLineNo">040</span><a id="line.40"> * Example Builder:</a>
+<span class="sourceLineNo">041</span><a id="line.41"> * &lt;pre&gt;&lt;code&gt;</a>
+<span class="sourceLineNo">042</span><a id="line.42"> * class FontBuilder implements Builder&amp;lt;Font&amp;gt; {</a>
+<span class="sourceLineNo">043</span><a id="line.43"> *     private Font font;</a>
+<span class="sourceLineNo">044</span><a id="line.44"> *</a>
+<span class="sourceLineNo">045</span><a id="line.45"> *     public FontBuilder(String fontName) {</a>
+<span class="sourceLineNo">046</span><a id="line.46"> *         this.font = new Font(fontName, Font.PLAIN, 12);</a>
+<span class="sourceLineNo">047</span><a id="line.47"> *     }</a>
+<span class="sourceLineNo">048</span><a id="line.48"> *</a>
+<span class="sourceLineNo">049</span><a id="line.49"> *     public FontBuilder bold() {</a>
+<span class="sourceLineNo">050</span><a id="line.50"> *         this.font = this.font.deriveFont(Font.BOLD);</a>
+<span class="sourceLineNo">051</span><a id="line.51"> *         return this; // Reference returned so calls can be chained</a>
+<span class="sourceLineNo">052</span><a id="line.52"> *     }</a>
+<span class="sourceLineNo">053</span><a id="line.53"> *</a>
+<span class="sourceLineNo">054</span><a id="line.54"> *     public FontBuilder size(float pointSize) {</a>
+<span class="sourceLineNo">055</span><a id="line.55"> *         this.font = this.font.deriveFont(pointSize);</a>
+<span class="sourceLineNo">056</span><a id="line.56"> *         return this; // Reference returned so calls can be chained</a>
+<span class="sourceLineNo">057</span><a id="line.57"> *     }</a>
+<span class="sourceLineNo">058</span><a id="line.58"> *</a>
+<span class="sourceLineNo">059</span><a id="line.59"> *     // Other Font construction methods</a>
+<span class="sourceLineNo">060</span><a id="line.60"> *</a>
+<span class="sourceLineNo">061</span><a id="line.61"> *     public Font build() {</a>
+<span class="sourceLineNo">062</span><a id="line.62"> *         return this.font;</a>
+<span class="sourceLineNo">063</span><a id="line.63"> *     }</a>
+<span class="sourceLineNo">064</span><a id="line.64"> * }</a>
+<span class="sourceLineNo">065</span><a id="line.65"> * &lt;/code&gt;&lt;/pre&gt;</a>
+<span class="sourceLineNo">066</span><a id="line.66"> *</a>
+<span class="sourceLineNo">067</span><a id="line.67"> * Example Builder Usage:</a>
+<span class="sourceLineNo">068</span><a id="line.68"> * &lt;pre&gt;&lt;code&gt;</a>
+<span class="sourceLineNo">069</span><a id="line.69"> * Font bold14ptSansSerifFont = new FontBuilder(Font.SANS_SERIF).bold()</a>
+<span class="sourceLineNo">070</span><a id="line.70"> *                                                              .size(14.0f)</a>
+<span class="sourceLineNo">071</span><a id="line.71"> *                                                              .build();</a>
+<span class="sourceLineNo">072</span><a id="line.72"> * &lt;/code&gt;&lt;/pre&gt;</a>
+<span class="sourceLineNo">073</span><a id="line.73"> *</a>
+<span class="sourceLineNo">074</span><a id="line.74"> *</a>
+<span class="sourceLineNo">075</span><a id="line.75"> * @param &lt;T&gt; the type of object that the builder will construct or compute.</a>
+<span class="sourceLineNo">076</span><a id="line.76"> * @since 1.0</a>
+<span class="sourceLineNo">077</span><a id="line.77"> *</a>
+<span class="sourceLineNo">078</span><a id="line.78"> */</a>
+<span class="sourceLineNo">079</span><a id="line.79">public interface Builder&lt;T&gt; {</a>
+<span class="sourceLineNo">080</span><a id="line.80"></a>
+<span class="sourceLineNo">081</span><a id="line.81">    /**</a>
+<span class="sourceLineNo">082</span><a id="line.82">     * Returns a reference to the object being constructed or result being</a>
+<span class="sourceLineNo">083</span><a id="line.83">     * calculated by the builder.</a>
+<span class="sourceLineNo">084</span><a id="line.84">     *</a>
+<span class="sourceLineNo">085</span><a id="line.85">     * @return the object constructed or result calculated by the builder.</a>
+<span class="sourceLineNo">086</span><a id="line.86">     */</a>
+<span class="sourceLineNo">087</span><a id="line.87">    T build();</a>
+<span class="sourceLineNo">088</span><a id="line.88">}</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</main>
+</body>
+</html>

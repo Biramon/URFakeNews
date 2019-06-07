@@ -1,0 +1,230 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<main role="main">
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a id="line.1">/*</a>
+<span class="sourceLineNo">002</span><a id="line.2"> * Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<span class="sourceLineNo">003</span><a id="line.3"> * contributor license agreements.  See the NOTICE file distributed with</a>
+<span class="sourceLineNo">004</span><a id="line.4"> * this work for additional information regarding copyright ownership.</a>
+<span class="sourceLineNo">005</span><a id="line.5"> * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<span class="sourceLineNo">006</span><a id="line.6"> * (the "License"); you may not use this file except in compliance with</a>
+<span class="sourceLineNo">007</span><a id="line.7"> * the License.  You may obtain a copy of the License at</a>
+<span class="sourceLineNo">008</span><a id="line.8"> *</a>
+<span class="sourceLineNo">009</span><a id="line.9"> *      http://www.apache.org/licenses/LICENSE-2.0</a>
+<span class="sourceLineNo">010</span><a id="line.10"> *</a>
+<span class="sourceLineNo">011</span><a id="line.11"> * Unless required by applicable law or agreed to in writing, software</a>
+<span class="sourceLineNo">012</span><a id="line.12"> * distributed under the License is distributed on an "AS IS" BASIS,</a>
+<span class="sourceLineNo">013</span><a id="line.13"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<span class="sourceLineNo">014</span><a id="line.14"> * See the License for the specific language governing permissions and</a>
+<span class="sourceLineNo">015</span><a id="line.15"> * limitations under the License.</a>
+<span class="sourceLineNo">016</span><a id="line.16"> */</a>
+<span class="sourceLineNo">017</span><a id="line.17">package org.apache.commons.text;</a>
+<span class="sourceLineNo">018</span><a id="line.18"></a>
+<span class="sourceLineNo">019</span><a id="line.19">import java.util.Formattable;</a>
+<span class="sourceLineNo">020</span><a id="line.20">import java.util.Formatter;</a>
+<span class="sourceLineNo">021</span><a id="line.21"></a>
+<span class="sourceLineNo">022</span><a id="line.22">import static java.util.FormattableFlags.LEFT_JUSTIFY;</a>
+<span class="sourceLineNo">023</span><a id="line.23"></a>
+<span class="sourceLineNo">024</span><a id="line.24">/**</a>
+<span class="sourceLineNo">025</span><a id="line.25"> * &lt;p&gt;Provides utilities for working with the {@code Formattable} interface.&lt;/p&gt;</a>
+<span class="sourceLineNo">026</span><a id="line.26"> *</a>
+<span class="sourceLineNo">027</span><a id="line.27"> * &lt;p&gt;The {@link Formattable} interface provides basic control over formatting</a>
+<span class="sourceLineNo">028</span><a id="line.28"> * when using a {@code Formatter}. It is primarily concerned with numeric precision</a>
+<span class="sourceLineNo">029</span><a id="line.29"> * and padding, and is not designed to allow generalised alternate formats.&lt;/p&gt;</a>
+<span class="sourceLineNo">030</span><a id="line.30"> *</a>
+<span class="sourceLineNo">031</span><a id="line.31"> * @since 1.0</a>
+<span class="sourceLineNo">032</span><a id="line.32"> *</a>
+<span class="sourceLineNo">033</span><a id="line.33"> */</a>
+<span class="sourceLineNo">034</span><a id="line.34">public class FormattableUtils {</a>
+<span class="sourceLineNo">035</span><a id="line.35"></a>
+<span class="sourceLineNo">036</span><a id="line.36">    /**</a>
+<span class="sourceLineNo">037</span><a id="line.37">     * A format that simply outputs the value as a string.</a>
+<span class="sourceLineNo">038</span><a id="line.38">     */</a>
+<span class="sourceLineNo">039</span><a id="line.39">    private static final String SIMPLEST_FORMAT = "%s";</a>
+<span class="sourceLineNo">040</span><a id="line.40"></a>
+<span class="sourceLineNo">041</span><a id="line.41">    /**</a>
+<span class="sourceLineNo">042</span><a id="line.42">     * &lt;p&gt;{@code FormattableUtils} instances should NOT be constructed in</a>
+<span class="sourceLineNo">043</span><a id="line.43">     * standard programming. Instead, the methods of the class should be invoked</a>
+<span class="sourceLineNo">044</span><a id="line.44">     * statically.&lt;/p&gt;</a>
+<span class="sourceLineNo">045</span><a id="line.45">     *</a>
+<span class="sourceLineNo">046</span><a id="line.46">     * &lt;p&gt;This constructor is public to permit tools that require a JavaBean</a>
+<span class="sourceLineNo">047</span><a id="line.47">     * instance to operate.&lt;/p&gt;</a>
+<span class="sourceLineNo">048</span><a id="line.48">     */</a>
+<span class="sourceLineNo">049</span><a id="line.49">    public FormattableUtils() {</a>
+<span class="sourceLineNo">050</span><a id="line.50">        super();</a>
+<span class="sourceLineNo">051</span><a id="line.51">    }</a>
+<span class="sourceLineNo">052</span><a id="line.52"></a>
+<span class="sourceLineNo">053</span><a id="line.53">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">054</span><a id="line.54">    /**</a>
+<span class="sourceLineNo">055</span><a id="line.55">     * Get the default formatted representation of the specified</a>
+<span class="sourceLineNo">056</span><a id="line.56">     * {@code Formattable}.</a>
+<span class="sourceLineNo">057</span><a id="line.57">     *</a>
+<span class="sourceLineNo">058</span><a id="line.58">     * @param formattable  the instance to convert to a string, not null</a>
+<span class="sourceLineNo">059</span><a id="line.59">     * @return the resulting string, not null</a>
+<span class="sourceLineNo">060</span><a id="line.60">     */</a>
+<span class="sourceLineNo">061</span><a id="line.61">    public static String toString(final Formattable formattable) {</a>
+<span class="sourceLineNo">062</span><a id="line.62">        return String.format(SIMPLEST_FORMAT, formattable);</a>
+<span class="sourceLineNo">063</span><a id="line.63">    }</a>
+<span class="sourceLineNo">064</span><a id="line.64"></a>
+<span class="sourceLineNo">065</span><a id="line.65">    /**</a>
+<span class="sourceLineNo">066</span><a id="line.66">     * Handles the common {@code Formattable} operations of truncate-pad-append,</a>
+<span class="sourceLineNo">067</span><a id="line.67">     * with no ellipsis on precision overflow, and padding width underflow with</a>
+<span class="sourceLineNo">068</span><a id="line.68">     * spaces.</a>
+<span class="sourceLineNo">069</span><a id="line.69">     *</a>
+<span class="sourceLineNo">070</span><a id="line.70">     * @param seq  the string to handle, not null</a>
+<span class="sourceLineNo">071</span><a id="line.71">     * @param formatter  the destination formatter, not null</a>
+<span class="sourceLineNo">072</span><a id="line.72">     * @param flags  the flags for formatting, see {@code Formattable}</a>
+<span class="sourceLineNo">073</span><a id="line.73">     * @param width  the width of the output, see {@code Formattable}</a>
+<span class="sourceLineNo">074</span><a id="line.74">     * @param precision  the precision of the output, see {@code Formattable}</a>
+<span class="sourceLineNo">075</span><a id="line.75">     * @return the {@code formatter} instance, not null</a>
+<span class="sourceLineNo">076</span><a id="line.76">     */</a>
+<span class="sourceLineNo">077</span><a id="line.77">    public static Formatter append(final CharSequence seq, final Formatter formatter, final int flags, final int width,</a>
+<span class="sourceLineNo">078</span><a id="line.78">            final int precision) {</a>
+<span class="sourceLineNo">079</span><a id="line.79">        return append(seq, formatter, flags, width, precision, ' ', null);</a>
+<span class="sourceLineNo">080</span><a id="line.80">    }</a>
+<span class="sourceLineNo">081</span><a id="line.81"></a>
+<span class="sourceLineNo">082</span><a id="line.82">    /**</a>
+<span class="sourceLineNo">083</span><a id="line.83">     * Handles the common {@link Formattable} operations of truncate-pad-append,</a>
+<span class="sourceLineNo">084</span><a id="line.84">     * with no ellipsis on precision overflow.</a>
+<span class="sourceLineNo">085</span><a id="line.85">     *</a>
+<span class="sourceLineNo">086</span><a id="line.86">     * @param seq  the string to handle, not null</a>
+<span class="sourceLineNo">087</span><a id="line.87">     * @param formatter  the destination formatter, not null</a>
+<span class="sourceLineNo">088</span><a id="line.88">     * @param flags  the flags for formatting, see {@code Formattable}</a>
+<span class="sourceLineNo">089</span><a id="line.89">     * @param width  the width of the output, see {@code Formattable}</a>
+<span class="sourceLineNo">090</span><a id="line.90">     * @param precision  the precision of the output, see {@code Formattable}</a>
+<span class="sourceLineNo">091</span><a id="line.91">     * @param padChar  the pad character to use</a>
+<span class="sourceLineNo">092</span><a id="line.92">     * @return the {@code formatter} instance, not null</a>
+<span class="sourceLineNo">093</span><a id="line.93">     */</a>
+<span class="sourceLineNo">094</span><a id="line.94">    public static Formatter append(final CharSequence seq, final Formatter formatter, final int flags, final int width,</a>
+<span class="sourceLineNo">095</span><a id="line.95">            final int precision, final char padChar) {</a>
+<span class="sourceLineNo">096</span><a id="line.96">        return append(seq, formatter, flags, width, precision, padChar, null);</a>
+<span class="sourceLineNo">097</span><a id="line.97">    }</a>
+<span class="sourceLineNo">098</span><a id="line.98"></a>
+<span class="sourceLineNo">099</span><a id="line.99">    /**</a>
+<span class="sourceLineNo">100</span><a id="line.100">     * Handles the common {@link Formattable} operations of truncate-pad-append,</a>
+<span class="sourceLineNo">101</span><a id="line.101">     * padding width underflow with spaces.</a>
+<span class="sourceLineNo">102</span><a id="line.102">     *</a>
+<span class="sourceLineNo">103</span><a id="line.103">     * @param seq  the string to handle, not null</a>
+<span class="sourceLineNo">104</span><a id="line.104">     * @param formatter  the destination formatter, not null</a>
+<span class="sourceLineNo">105</span><a id="line.105">     * @param flags  the flags for formatting, see {@code Formattable}</a>
+<span class="sourceLineNo">106</span><a id="line.106">     * @param width  the width of the output, see {@code Formattable}</a>
+<span class="sourceLineNo">107</span><a id="line.107">     * @param precision  the precision of the output, see {@code Formattable}</a>
+<span class="sourceLineNo">108</span><a id="line.108">     * @param ellipsis  the ellipsis to use when precision dictates truncation, null or</a>
+<span class="sourceLineNo">109</span><a id="line.109">     *  empty causes a hard truncation</a>
+<span class="sourceLineNo">110</span><a id="line.110">     * @return the {@code formatter} instance, not null</a>
+<span class="sourceLineNo">111</span><a id="line.111">     */</a>
+<span class="sourceLineNo">112</span><a id="line.112">    public static Formatter append(final CharSequence seq, final Formatter formatter, final int flags, final int width,</a>
+<span class="sourceLineNo">113</span><a id="line.113">            final int precision, final CharSequence ellipsis) {</a>
+<span class="sourceLineNo">114</span><a id="line.114">        return append(seq, formatter, flags, width, precision, ' ', ellipsis);</a>
+<span class="sourceLineNo">115</span><a id="line.115">    }</a>
+<span class="sourceLineNo">116</span><a id="line.116"></a>
+<span class="sourceLineNo">117</span><a id="line.117">    /**</a>
+<span class="sourceLineNo">118</span><a id="line.118">     * Handles the common {@link Formattable} operations of truncate-pad-append.</a>
+<span class="sourceLineNo">119</span><a id="line.119">     *</a>
+<span class="sourceLineNo">120</span><a id="line.120">     * @param seq  the string to handle, not null</a>
+<span class="sourceLineNo">121</span><a id="line.121">     * @param formatter  the destination formatter, not null</a>
+<span class="sourceLineNo">122</span><a id="line.122">     * @param flags  the flags for formatting, see {@code Formattable}</a>
+<span class="sourceLineNo">123</span><a id="line.123">     * @param width  the width of the output, see {@code Formattable}</a>
+<span class="sourceLineNo">124</span><a id="line.124">     * @param precision  the precision of the output, see {@code Formattable}</a>
+<span class="sourceLineNo">125</span><a id="line.125">     * @param padChar  the pad character to use</a>
+<span class="sourceLineNo">126</span><a id="line.126">     * @param ellipsis  the ellipsis to use when precision dictates truncation, null or</a>
+<span class="sourceLineNo">127</span><a id="line.127">     *  empty causes a hard truncation</a>
+<span class="sourceLineNo">128</span><a id="line.128">     * @return the {@code formatter} instance, not null</a>
+<span class="sourceLineNo">129</span><a id="line.129">     */</a>
+<span class="sourceLineNo">130</span><a id="line.130">    public static Formatter append(final CharSequence seq, final Formatter formatter, final int flags, final int width,</a>
+<span class="sourceLineNo">131</span><a id="line.131">            final int precision, final char padChar, final CharSequence ellipsis) {</a>
+<span class="sourceLineNo">132</span><a id="line.132">        if (!(ellipsis == null || precision &lt; 0 || ellipsis.length() &lt;= precision)) {</a>
+<span class="sourceLineNo">133</span><a id="line.133">            throw new IllegalArgumentException(</a>
+<span class="sourceLineNo">134</span><a id="line.134">                    String.format("Specified ellipsis '%s' exceeds precision of %s",</a>
+<span class="sourceLineNo">135</span><a id="line.135">                            ellipsis,</a>
+<span class="sourceLineNo">136</span><a id="line.136">                            precision));</a>
+<span class="sourceLineNo">137</span><a id="line.137">        }</a>
+<span class="sourceLineNo">138</span><a id="line.138">        final StringBuilder buf = new StringBuilder(seq);</a>
+<span class="sourceLineNo">139</span><a id="line.139">        if (precision &gt;= 0 &amp;&amp; precision &lt; seq.length()) {</a>
+<span class="sourceLineNo">140</span><a id="line.140">            final CharSequence _ellipsis;</a>
+<span class="sourceLineNo">141</span><a id="line.141">            if (ellipsis == null) {</a>
+<span class="sourceLineNo">142</span><a id="line.142">                _ellipsis = "";</a>
+<span class="sourceLineNo">143</span><a id="line.143">            } else {</a>
+<span class="sourceLineNo">144</span><a id="line.144">                _ellipsis = ellipsis;</a>
+<span class="sourceLineNo">145</span><a id="line.145">            }</a>
+<span class="sourceLineNo">146</span><a id="line.146">            buf.replace(precision - _ellipsis.length(), seq.length(), _ellipsis.toString());</a>
+<span class="sourceLineNo">147</span><a id="line.147">        }</a>
+<span class="sourceLineNo">148</span><a id="line.148">        final boolean leftJustify = (flags &amp; LEFT_JUSTIFY) == LEFT_JUSTIFY;</a>
+<span class="sourceLineNo">149</span><a id="line.149">        for (int i = buf.length(); i &lt; width; i++) {</a>
+<span class="sourceLineNo">150</span><a id="line.150">            buf.insert(leftJustify ? i : 0, padChar);</a>
+<span class="sourceLineNo">151</span><a id="line.151">        }</a>
+<span class="sourceLineNo">152</span><a id="line.152">        formatter.format(buf.toString());</a>
+<span class="sourceLineNo">153</span><a id="line.153">        return formatter;</a>
+<span class="sourceLineNo">154</span><a id="line.154">    }</a>
+<span class="sourceLineNo">155</span><a id="line.155"></a>
+<span class="sourceLineNo">156</span><a id="line.156">}</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</main>
+</body>
+</html>

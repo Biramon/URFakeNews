@@ -1,0 +1,1349 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<main role="main">
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a id="line.1">/*</a>
+<span class="sourceLineNo">002</span><a id="line.2"> * Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<span class="sourceLineNo">003</span><a id="line.3"> * contributor license agreements.  See the NOTICE file distributed with</a>
+<span class="sourceLineNo">004</span><a id="line.4"> * this work for additional information regarding copyright ownership.</a>
+<span class="sourceLineNo">005</span><a id="line.5"> * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<span class="sourceLineNo">006</span><a id="line.6"> * (the "License"); you may not use this file except in compliance with</a>
+<span class="sourceLineNo">007</span><a id="line.7"> * the License.  You may obtain a copy of the License at</a>
+<span class="sourceLineNo">008</span><a id="line.8"> *</a>
+<span class="sourceLineNo">009</span><a id="line.9"> *      http://www.apache.org/licenses/LICENSE-2.0</a>
+<span class="sourceLineNo">010</span><a id="line.10"> *</a>
+<span class="sourceLineNo">011</span><a id="line.11"> * Unless required by applicable law or agreed to in writing, software</a>
+<span class="sourceLineNo">012</span><a id="line.12"> * distributed under the License is distributed on an "AS IS" BASIS,</a>
+<span class="sourceLineNo">013</span><a id="line.13"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<span class="sourceLineNo">014</span><a id="line.14"> * See the License for the specific language governing permissions and</a>
+<span class="sourceLineNo">015</span><a id="line.15"> * limitations under the License.</a>
+<span class="sourceLineNo">016</span><a id="line.16"> */</a>
+<span class="sourceLineNo">017</span><a id="line.17">package org.apache.commons.text;</a>
+<span class="sourceLineNo">018</span><a id="line.18"></a>
+<span class="sourceLineNo">019</span><a id="line.19">import java.util.ArrayList;</a>
+<span class="sourceLineNo">020</span><a id="line.20">import java.util.Enumeration;</a>
+<span class="sourceLineNo">021</span><a id="line.21">import java.util.HashMap;</a>
+<span class="sourceLineNo">022</span><a id="line.22">import java.util.List;</a>
+<span class="sourceLineNo">023</span><a id="line.23">import java.util.Map;</a>
+<span class="sourceLineNo">024</span><a id="line.24">import java.util.Properties;</a>
+<span class="sourceLineNo">025</span><a id="line.25"></a>
+<span class="sourceLineNo">026</span><a id="line.26">import org.apache.commons.lang3.Validate;</a>
+<span class="sourceLineNo">027</span><a id="line.27"></a>
+<span class="sourceLineNo">028</span><a id="line.28">/**</a>
+<span class="sourceLineNo">029</span><a id="line.29"> * Substitutes variables within a string by values.</a>
+<span class="sourceLineNo">030</span><a id="line.30"> * &lt;p&gt;</a>
+<span class="sourceLineNo">031</span><a id="line.31"> * This class takes a piece of text and substitutes all the variables within it.</a>
+<span class="sourceLineNo">032</span><a id="line.32"> * The default definition of a variable is &lt;code&gt;${variableName}&lt;/code&gt;.</a>
+<span class="sourceLineNo">033</span><a id="line.33"> * The prefix and suffix can be changed via constructors and set methods.</a>
+<span class="sourceLineNo">034</span><a id="line.34"> * &lt;p&gt;</a>
+<span class="sourceLineNo">035</span><a id="line.35"> * Variable values are typically resolved from a map, but could also be resolved</a>
+<span class="sourceLineNo">036</span><a id="line.36"> * from system properties, or by supplying a custom variable resolver.</a>
+<span class="sourceLineNo">037</span><a id="line.37"> * &lt;p&gt;</a>
+<span class="sourceLineNo">038</span><a id="line.38"> * The simplest example is to use this class to replace Java System properties. For example:</a>
+<span class="sourceLineNo">039</span><a id="line.39"> * &lt;pre&gt;</a>
+<span class="sourceLineNo">040</span><a id="line.40"> * StrSubstitutor.replaceSystemProperties(</a>
+<span class="sourceLineNo">041</span><a id="line.41"> *      "You are running with java.version = ${java.version} and os.name = ${os.name}.");</a>
+<span class="sourceLineNo">042</span><a id="line.42"> * &lt;/pre&gt;</a>
+<span class="sourceLineNo">043</span><a id="line.43"> * &lt;p&gt;</a>
+<span class="sourceLineNo">044</span><a id="line.44"> * Typical usage of this class follows the following pattern: First an instance is created</a>
+<span class="sourceLineNo">045</span><a id="line.45"> * and initialized with the map that contains the values for the available variables.</a>
+<span class="sourceLineNo">046</span><a id="line.46"> * If a prefix and/or suffix for variables should be used other than the default ones,</a>
+<span class="sourceLineNo">047</span><a id="line.47"> * the appropriate settings can be performed. After that the &lt;code&gt;replace()&lt;/code&gt;</a>
+<span class="sourceLineNo">048</span><a id="line.48"> * method can be called passing in the source text for interpolation. In the returned</a>
+<span class="sourceLineNo">049</span><a id="line.49"> * text all variable references (as long as their values are known) will be resolved.</a>
+<span class="sourceLineNo">050</span><a id="line.50"> * The following example demonstrates this:</a>
+<span class="sourceLineNo">051</span><a id="line.51"> * &lt;pre&gt;</a>
+<span class="sourceLineNo">052</span><a id="line.52"> * Map valuesMap = HashMap();</a>
+<span class="sourceLineNo">053</span><a id="line.53"> * valuesMap.put(&amp;quot;animal&amp;quot;, &amp;quot;quick brown fox&amp;quot;);</a>
+<span class="sourceLineNo">054</span><a id="line.54"> * valuesMap.put(&amp;quot;target&amp;quot;, &amp;quot;lazy dog&amp;quot;);</a>
+<span class="sourceLineNo">055</span><a id="line.55"> * String templateString = &amp;quot;The ${animal} jumped over the ${target}.&amp;quot;;</a>
+<span class="sourceLineNo">056</span><a id="line.56"> * StrSubstitutor sub = new StrSubstitutor(valuesMap);</a>
+<span class="sourceLineNo">057</span><a id="line.57"> * String resolvedString = sub.replace(templateString);</a>
+<span class="sourceLineNo">058</span><a id="line.58"> * &lt;/pre&gt;</a>
+<span class="sourceLineNo">059</span><a id="line.59"> * yielding:</a>
+<span class="sourceLineNo">060</span><a id="line.60"> * &lt;pre&gt;</a>
+<span class="sourceLineNo">061</span><a id="line.61"> *      The quick brown fox jumped over the lazy dog.</a>
+<span class="sourceLineNo">062</span><a id="line.62"> * &lt;/pre&gt;</a>
+<span class="sourceLineNo">063</span><a id="line.63"> * &lt;p&gt;</a>
+<span class="sourceLineNo">064</span><a id="line.64"> * Also, this class allows to set a default value for unresolved variables.</a>
+<span class="sourceLineNo">065</span><a id="line.65"> * The default value for a variable can be appended to the variable name after the variable</a>
+<span class="sourceLineNo">066</span><a id="line.66"> * default value delimiter. The default value of the variable default value delimiter is ':-',</a>
+<span class="sourceLineNo">067</span><a id="line.67"> * as in bash and other *nix shells, as those are arguably where the default ${} delimiter set originated.</a>
+<span class="sourceLineNo">068</span><a id="line.68"> * The variable default value delimiter can be manually set by calling {@link #setValueDelimiterMatcher(StrMatcher)},</a>
+<span class="sourceLineNo">069</span><a id="line.69"> * {@link #setValueDelimiter(char)} or {@link #setValueDelimiter(String)}.</a>
+<span class="sourceLineNo">070</span><a id="line.70"> * The following shows an example with variable default value settings:</a>
+<span class="sourceLineNo">071</span><a id="line.71"> * &lt;pre&gt;</a>
+<span class="sourceLineNo">072</span><a id="line.72"> * Map valuesMap = HashMap();</a>
+<span class="sourceLineNo">073</span><a id="line.73"> * valuesMap.put(&amp;quot;animal&amp;quot;, &amp;quot;quick brown fox&amp;quot;);</a>
+<span class="sourceLineNo">074</span><a id="line.74"> * valuesMap.put(&amp;quot;target&amp;quot;, &amp;quot;lazy dog&amp;quot;);</a>
+<span class="sourceLineNo">075</span><a id="line.75"> * String templateString = &amp;quot;The ${animal} jumped over the ${target}. ${undefined.number:-1234567890}.&amp;quot;;</a>
+<span class="sourceLineNo">076</span><a id="line.76"> * StrSubstitutor sub = new StrSubstitutor(valuesMap);</a>
+<span class="sourceLineNo">077</span><a id="line.77"> * String resolvedString = sub.replace(templateString);</a>
+<span class="sourceLineNo">078</span><a id="line.78"> * &lt;/pre&gt;</a>
+<span class="sourceLineNo">079</span><a id="line.79"> * yielding:</a>
+<span class="sourceLineNo">080</span><a id="line.80"> * &lt;pre&gt;</a>
+<span class="sourceLineNo">081</span><a id="line.81"> *      The quick brown fox jumped over the lazy dog. 1234567890.</a>
+<span class="sourceLineNo">082</span><a id="line.82"> * &lt;/pre&gt;</a>
+<span class="sourceLineNo">083</span><a id="line.83"> * &lt;p&gt;</a>
+<span class="sourceLineNo">084</span><a id="line.84"> * In addition to this usage pattern there are some static convenience methods that</a>
+<span class="sourceLineNo">085</span><a id="line.85"> * cover the most common use cases. These methods can be used without the need of</a>
+<span class="sourceLineNo">086</span><a id="line.86"> * manually creating an instance. However if multiple replace operations are to be</a>
+<span class="sourceLineNo">087</span><a id="line.87"> * performed, creating and reusing an instance of this class will be more efficient.</a>
+<span class="sourceLineNo">088</span><a id="line.88"> * &lt;p&gt;</a>
+<span class="sourceLineNo">089</span><a id="line.89"> * Variable replacement works in a recursive way. Thus, if a variable value contains</a>
+<span class="sourceLineNo">090</span><a id="line.90"> * a variable then that variable will also be replaced. Cyclic replacements are</a>
+<span class="sourceLineNo">091</span><a id="line.91"> * detected and will cause an exception to be thrown.</a>
+<span class="sourceLineNo">092</span><a id="line.92"> * &lt;p&gt;</a>
+<span class="sourceLineNo">093</span><a id="line.93"> * Sometimes the interpolation's result must contain a variable prefix. As an example</a>
+<span class="sourceLineNo">094</span><a id="line.94"> * take the following source text:</a>
+<span class="sourceLineNo">095</span><a id="line.95"> * &lt;pre&gt;</a>
+<span class="sourceLineNo">096</span><a id="line.96"> *   The variable ${${name}} must be used.</a>
+<span class="sourceLineNo">097</span><a id="line.97"> * &lt;/pre&gt;</a>
+<span class="sourceLineNo">098</span><a id="line.98"> * Here only the variable's name referred to in the text should be replaced resulting</a>
+<span class="sourceLineNo">099</span><a id="line.99"> * in the text (assuming that the value of the &lt;code&gt;name&lt;/code&gt; variable is &lt;code&gt;x&lt;/code&gt;):</a>
+<span class="sourceLineNo">100</span><a id="line.100"> * &lt;pre&gt;</a>
+<span class="sourceLineNo">101</span><a id="line.101"> *   The variable ${x} must be used.</a>
+<span class="sourceLineNo">102</span><a id="line.102"> * &lt;/pre&gt;</a>
+<span class="sourceLineNo">103</span><a id="line.103"> * To achieve this effect there are two possibilities: Either set a different prefix</a>
+<span class="sourceLineNo">104</span><a id="line.104"> * and suffix for variables which do not conflict with the result text you want to</a>
+<span class="sourceLineNo">105</span><a id="line.105"> * produce. The other possibility is to use the escape character, by default '$'.</a>
+<span class="sourceLineNo">106</span><a id="line.106"> * If this character is placed before a variable reference, this reference is ignored</a>
+<span class="sourceLineNo">107</span><a id="line.107"> * and won't be replaced. For example:</a>
+<span class="sourceLineNo">108</span><a id="line.108"> * &lt;pre&gt;</a>
+<span class="sourceLineNo">109</span><a id="line.109"> *   The variable $${${name}} must be used.</a>
+<span class="sourceLineNo">110</span><a id="line.110"> * &lt;/pre&gt;</a>
+<span class="sourceLineNo">111</span><a id="line.111"> * &lt;p&gt;</a>
+<span class="sourceLineNo">112</span><a id="line.112"> * In some complex scenarios you might even want to perform substitution in the</a>
+<span class="sourceLineNo">113</span><a id="line.113"> * names of variables, for instance</a>
+<span class="sourceLineNo">114</span><a id="line.114"> * &lt;pre&gt;</a>
+<span class="sourceLineNo">115</span><a id="line.115"> * ${jre-${java.specification.version}}</a>
+<span class="sourceLineNo">116</span><a id="line.116"> * &lt;/pre&gt;</a>
+<span class="sourceLineNo">117</span><a id="line.117"> * &lt;code&gt;StrSubstitutor&lt;/code&gt; supports this recursive substitution in variable</a>
+<span class="sourceLineNo">118</span><a id="line.118"> * names, but it has to be enabled explicitly by setting the</a>
+<span class="sourceLineNo">119</span><a id="line.119"> * {@link #setEnableSubstitutionInVariables(boolean) enableSubstitutionInVariables}</a>
+<span class="sourceLineNo">120</span><a id="line.120"> * property to &lt;b&gt;true&lt;/b&gt;.</a>
+<span class="sourceLineNo">121</span><a id="line.121"> * &lt;p&gt;This class is &lt;b&gt;not&lt;/b&gt; thread safe.&lt;/p&gt;</a>
+<span class="sourceLineNo">122</span><a id="line.122"> *</a>
+<span class="sourceLineNo">123</span><a id="line.123"> * @since 1.0</a>
+<span class="sourceLineNo">124</span><a id="line.124"> * @deprecated Deprecated as of 1.3, use {@link StringSubstitutor} instead. This class will be removed in 2.0.</a>
+<span class="sourceLineNo">125</span><a id="line.125"> */</a>
+<span class="sourceLineNo">126</span><a id="line.126">@Deprecated</a>
+<span class="sourceLineNo">127</span><a id="line.127">public class StrSubstitutor {</a>
+<span class="sourceLineNo">128</span><a id="line.128"></a>
+<span class="sourceLineNo">129</span><a id="line.129">    /**</a>
+<span class="sourceLineNo">130</span><a id="line.130">     * Constant for the default escape character.</a>
+<span class="sourceLineNo">131</span><a id="line.131">     */</a>
+<span class="sourceLineNo">132</span><a id="line.132">    public static final char DEFAULT_ESCAPE = '$';</a>
+<span class="sourceLineNo">133</span><a id="line.133"></a>
+<span class="sourceLineNo">134</span><a id="line.134">    /**</a>
+<span class="sourceLineNo">135</span><a id="line.135">     * Constant for the default variable prefix.</a>
+<span class="sourceLineNo">136</span><a id="line.136">     */</a>
+<span class="sourceLineNo">137</span><a id="line.137">    public static final StrMatcher DEFAULT_PREFIX = StrMatcher.stringMatcher("${");</a>
+<span class="sourceLineNo">138</span><a id="line.138"></a>
+<span class="sourceLineNo">139</span><a id="line.139">    /**</a>
+<span class="sourceLineNo">140</span><a id="line.140">     * Constant for the default variable suffix.</a>
+<span class="sourceLineNo">141</span><a id="line.141">     */</a>
+<span class="sourceLineNo">142</span><a id="line.142">    public static final StrMatcher DEFAULT_SUFFIX = StrMatcher.stringMatcher("}");</a>
+<span class="sourceLineNo">143</span><a id="line.143"></a>
+<span class="sourceLineNo">144</span><a id="line.144">    /**</a>
+<span class="sourceLineNo">145</span><a id="line.145">     * Constant for the default value delimiter of a variable.</a>
+<span class="sourceLineNo">146</span><a id="line.146">     */</a>
+<span class="sourceLineNo">147</span><a id="line.147">    public static final StrMatcher DEFAULT_VALUE_DELIMITER = StrMatcher.stringMatcher(":-");</a>
+<span class="sourceLineNo">148</span><a id="line.148"></a>
+<span class="sourceLineNo">149</span><a id="line.149">    /**</a>
+<span class="sourceLineNo">150</span><a id="line.150">     * Stores the escape character.</a>
+<span class="sourceLineNo">151</span><a id="line.151">     */</a>
+<span class="sourceLineNo">152</span><a id="line.152">    private char escapeChar;</a>
+<span class="sourceLineNo">153</span><a id="line.153"></a>
+<span class="sourceLineNo">154</span><a id="line.154">    /**</a>
+<span class="sourceLineNo">155</span><a id="line.155">     * Stores the variable prefix.</a>
+<span class="sourceLineNo">156</span><a id="line.156">     */</a>
+<span class="sourceLineNo">157</span><a id="line.157">    private StrMatcher prefixMatcher;</a>
+<span class="sourceLineNo">158</span><a id="line.158"></a>
+<span class="sourceLineNo">159</span><a id="line.159">    /**</a>
+<span class="sourceLineNo">160</span><a id="line.160">     * Stores the variable suffix.</a>
+<span class="sourceLineNo">161</span><a id="line.161">     */</a>
+<span class="sourceLineNo">162</span><a id="line.162">    private StrMatcher suffixMatcher;</a>
+<span class="sourceLineNo">163</span><a id="line.163"></a>
+<span class="sourceLineNo">164</span><a id="line.164">    /**</a>
+<span class="sourceLineNo">165</span><a id="line.165">     * Stores the default variable value delimiter.</a>
+<span class="sourceLineNo">166</span><a id="line.166">     */</a>
+<span class="sourceLineNo">167</span><a id="line.167">    private StrMatcher valueDelimiterMatcher;</a>
+<span class="sourceLineNo">168</span><a id="line.168"></a>
+<span class="sourceLineNo">169</span><a id="line.169">    /**</a>
+<span class="sourceLineNo">170</span><a id="line.170">     * Variable resolution is delegated to an implementor of VariableResolver.</a>
+<span class="sourceLineNo">171</span><a id="line.171">     */</a>
+<span class="sourceLineNo">172</span><a id="line.172">    private StrLookup&lt;?&gt; variableResolver;</a>
+<span class="sourceLineNo">173</span><a id="line.173"></a>
+<span class="sourceLineNo">174</span><a id="line.174">    /**</a>
+<span class="sourceLineNo">175</span><a id="line.175">     * The flag whether substitution in variable names is enabled.</a>
+<span class="sourceLineNo">176</span><a id="line.176">     */</a>
+<span class="sourceLineNo">177</span><a id="line.177">    private boolean enableSubstitutionInVariables;</a>
+<span class="sourceLineNo">178</span><a id="line.178"></a>
+<span class="sourceLineNo">179</span><a id="line.179">    /**</a>
+<span class="sourceLineNo">180</span><a id="line.180">     * Whether escapes should be preserved.  Default is false;</a>
+<span class="sourceLineNo">181</span><a id="line.181">     */</a>
+<span class="sourceLineNo">182</span><a id="line.182">    private boolean preserveEscapes = false;</a>
+<span class="sourceLineNo">183</span><a id="line.183"></a>
+<span class="sourceLineNo">184</span><a id="line.184">    /**</a>
+<span class="sourceLineNo">185</span><a id="line.185">     * The flag whether substitution in variable values is disabled.</a>
+<span class="sourceLineNo">186</span><a id="line.186">     */</a>
+<span class="sourceLineNo">187</span><a id="line.187">    private boolean disableSubstitutionInValues;</a>
+<span class="sourceLineNo">188</span><a id="line.188"></a>
+<span class="sourceLineNo">189</span><a id="line.189">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">190</span><a id="line.190">    /**</a>
+<span class="sourceLineNo">191</span><a id="line.191">     * Replaces all the occurrences of variables in the given source object with</a>
+<span class="sourceLineNo">192</span><a id="line.192">     * their matching values from the map.</a>
+<span class="sourceLineNo">193</span><a id="line.193">     *</a>
+<span class="sourceLineNo">194</span><a id="line.194">     * @param &lt;V&gt; the type of the values in the map</a>
+<span class="sourceLineNo">195</span><a id="line.195">     * @param source  the source text containing the variables to substitute, null returns null</a>
+<span class="sourceLineNo">196</span><a id="line.196">     * @param valueMap  the map with the values, may be null</a>
+<span class="sourceLineNo">197</span><a id="line.197">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">198</span><a id="line.198">     */</a>
+<span class="sourceLineNo">199</span><a id="line.199">    public static &lt;V&gt; String replace(final Object source, final Map&lt;String, V&gt; valueMap) {</a>
+<span class="sourceLineNo">200</span><a id="line.200">        return new StrSubstitutor(valueMap).replace(source);</a>
+<span class="sourceLineNo">201</span><a id="line.201">    }</a>
+<span class="sourceLineNo">202</span><a id="line.202"></a>
+<span class="sourceLineNo">203</span><a id="line.203">    /**</a>
+<span class="sourceLineNo">204</span><a id="line.204">     * Replaces all the occurrences of variables in the given source object with</a>
+<span class="sourceLineNo">205</span><a id="line.205">     * their matching values from the map. This method allows to specify a</a>
+<span class="sourceLineNo">206</span><a id="line.206">     * custom variable prefix and suffix</a>
+<span class="sourceLineNo">207</span><a id="line.207">     *</a>
+<span class="sourceLineNo">208</span><a id="line.208">     * @param &lt;V&gt; the type of the values in the map</a>
+<span class="sourceLineNo">209</span><a id="line.209">     * @param source  the source text containing the variables to substitute, null returns null</a>
+<span class="sourceLineNo">210</span><a id="line.210">     * @param valueMap  the map with the values, may be null</a>
+<span class="sourceLineNo">211</span><a id="line.211">     * @param prefix  the prefix of variables, not null</a>
+<span class="sourceLineNo">212</span><a id="line.212">     * @param suffix  the suffix of variables, not null</a>
+<span class="sourceLineNo">213</span><a id="line.213">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">214</span><a id="line.214">     * @throws IllegalArgumentException if the prefix or suffix is null</a>
+<span class="sourceLineNo">215</span><a id="line.215">     */</a>
+<span class="sourceLineNo">216</span><a id="line.216">    public static &lt;V&gt; String replace(final Object source,</a>
+<span class="sourceLineNo">217</span><a id="line.217">                                     final Map&lt;String, V&gt; valueMap,</a>
+<span class="sourceLineNo">218</span><a id="line.218">                                     final String prefix,</a>
+<span class="sourceLineNo">219</span><a id="line.219">                                     final String suffix) {</a>
+<span class="sourceLineNo">220</span><a id="line.220">        return new StrSubstitutor(valueMap, prefix, suffix).replace(source);</a>
+<span class="sourceLineNo">221</span><a id="line.221">    }</a>
+<span class="sourceLineNo">222</span><a id="line.222"></a>
+<span class="sourceLineNo">223</span><a id="line.223">    /**</a>
+<span class="sourceLineNo">224</span><a id="line.224">     * Replaces all the occurrences of variables in the given source object with their matching</a>
+<span class="sourceLineNo">225</span><a id="line.225">     * values from the properties.</a>
+<span class="sourceLineNo">226</span><a id="line.226">     *</a>
+<span class="sourceLineNo">227</span><a id="line.227">     * @param source the source text containing the variables to substitute, null returns null</a>
+<span class="sourceLineNo">228</span><a id="line.228">     * @param valueProperties the properties with values, may be null</a>
+<span class="sourceLineNo">229</span><a id="line.229">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">230</span><a id="line.230">     */</a>
+<span class="sourceLineNo">231</span><a id="line.231">    public static String replace(final Object source, final Properties valueProperties) {</a>
+<span class="sourceLineNo">232</span><a id="line.232">        if (valueProperties == null) {</a>
+<span class="sourceLineNo">233</span><a id="line.233">            return source.toString();</a>
+<span class="sourceLineNo">234</span><a id="line.234">        }</a>
+<span class="sourceLineNo">235</span><a id="line.235">        final Map&lt;String, String&gt; valueMap = new HashMap&lt;&gt;();</a>
+<span class="sourceLineNo">236</span><a id="line.236">        final Enumeration&lt;?&gt; propNames = valueProperties.propertyNames();</a>
+<span class="sourceLineNo">237</span><a id="line.237">        while (propNames.hasMoreElements()) {</a>
+<span class="sourceLineNo">238</span><a id="line.238">            final String propName = (String) propNames.nextElement();</a>
+<span class="sourceLineNo">239</span><a id="line.239">            final String propValue = valueProperties.getProperty(propName);</a>
+<span class="sourceLineNo">240</span><a id="line.240">            valueMap.put(propName, propValue);</a>
+<span class="sourceLineNo">241</span><a id="line.241">        }</a>
+<span class="sourceLineNo">242</span><a id="line.242">        return StrSubstitutor.replace(source, valueMap);</a>
+<span class="sourceLineNo">243</span><a id="line.243">    }</a>
+<span class="sourceLineNo">244</span><a id="line.244"></a>
+<span class="sourceLineNo">245</span><a id="line.245">    /**</a>
+<span class="sourceLineNo">246</span><a id="line.246">     * Replaces all the occurrences of variables in the given source object with</a>
+<span class="sourceLineNo">247</span><a id="line.247">     * their matching values from the system properties.</a>
+<span class="sourceLineNo">248</span><a id="line.248">     *</a>
+<span class="sourceLineNo">249</span><a id="line.249">     * @param source  the source text containing the variables to substitute, null returns null</a>
+<span class="sourceLineNo">250</span><a id="line.250">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">251</span><a id="line.251">     */</a>
+<span class="sourceLineNo">252</span><a id="line.252">    public static String replaceSystemProperties(final Object source) {</a>
+<span class="sourceLineNo">253</span><a id="line.253">        return new StrSubstitutor(StrLookup.systemPropertiesLookup()).replace(source);</a>
+<span class="sourceLineNo">254</span><a id="line.254">    }</a>
+<span class="sourceLineNo">255</span><a id="line.255"></a>
+<span class="sourceLineNo">256</span><a id="line.256">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">257</span><a id="line.257">    /**</a>
+<span class="sourceLineNo">258</span><a id="line.258">     * Creates a new instance with defaults for variable prefix and suffix</a>
+<span class="sourceLineNo">259</span><a id="line.259">     * and the escaping character.</a>
+<span class="sourceLineNo">260</span><a id="line.260">     */</a>
+<span class="sourceLineNo">261</span><a id="line.261">    public StrSubstitutor() {</a>
+<span class="sourceLineNo">262</span><a id="line.262">        this((StrLookup&lt;?&gt;) null, DEFAULT_PREFIX, DEFAULT_SUFFIX, DEFAULT_ESCAPE);</a>
+<span class="sourceLineNo">263</span><a id="line.263">    }</a>
+<span class="sourceLineNo">264</span><a id="line.264"></a>
+<span class="sourceLineNo">265</span><a id="line.265">    /**</a>
+<span class="sourceLineNo">266</span><a id="line.266">     * Creates a new instance and initializes it. Uses defaults for variable</a>
+<span class="sourceLineNo">267</span><a id="line.267">     * prefix and suffix and the escaping character.</a>
+<span class="sourceLineNo">268</span><a id="line.268">     *</a>
+<span class="sourceLineNo">269</span><a id="line.269">     * @param &lt;V&gt; the type of the values in the map</a>
+<span class="sourceLineNo">270</span><a id="line.270">     * @param valueMap  the map with the variables' values, may be null</a>
+<span class="sourceLineNo">271</span><a id="line.271">     */</a>
+<span class="sourceLineNo">272</span><a id="line.272">    public &lt;V&gt; StrSubstitutor(final Map&lt;String, V&gt; valueMap) {</a>
+<span class="sourceLineNo">273</span><a id="line.273">        this(StrLookup.mapLookup(valueMap), DEFAULT_PREFIX, DEFAULT_SUFFIX, DEFAULT_ESCAPE);</a>
+<span class="sourceLineNo">274</span><a id="line.274">    }</a>
+<span class="sourceLineNo">275</span><a id="line.275"></a>
+<span class="sourceLineNo">276</span><a id="line.276">    /**</a>
+<span class="sourceLineNo">277</span><a id="line.277">     * Creates a new instance and initializes it. Uses a default escaping character.</a>
+<span class="sourceLineNo">278</span><a id="line.278">     *</a>
+<span class="sourceLineNo">279</span><a id="line.279">     * @param &lt;V&gt; the type of the values in the map</a>
+<span class="sourceLineNo">280</span><a id="line.280">     * @param valueMap  the map with the variables' values, may be null</a>
+<span class="sourceLineNo">281</span><a id="line.281">     * @param prefix  the prefix for variables, not null</a>
+<span class="sourceLineNo">282</span><a id="line.282">     * @param suffix  the suffix for variables, not null</a>
+<span class="sourceLineNo">283</span><a id="line.283">     * @throws IllegalArgumentException if the prefix or suffix is null</a>
+<span class="sourceLineNo">284</span><a id="line.284">     */</a>
+<span class="sourceLineNo">285</span><a id="line.285">    public &lt;V&gt; StrSubstitutor(final Map&lt;String, V&gt; valueMap, final String prefix, final String suffix) {</a>
+<span class="sourceLineNo">286</span><a id="line.286">        this(StrLookup.mapLookup(valueMap), prefix, suffix, DEFAULT_ESCAPE);</a>
+<span class="sourceLineNo">287</span><a id="line.287">    }</a>
+<span class="sourceLineNo">288</span><a id="line.288"></a>
+<span class="sourceLineNo">289</span><a id="line.289">    /**</a>
+<span class="sourceLineNo">290</span><a id="line.290">     * Creates a new instance and initializes it.</a>
+<span class="sourceLineNo">291</span><a id="line.291">     *</a>
+<span class="sourceLineNo">292</span><a id="line.292">     * @param &lt;V&gt; the type of the values in the map</a>
+<span class="sourceLineNo">293</span><a id="line.293">     * @param valueMap  the map with the variables' values, may be null</a>
+<span class="sourceLineNo">294</span><a id="line.294">     * @param prefix  the prefix for variables, not null</a>
+<span class="sourceLineNo">295</span><a id="line.295">     * @param suffix  the suffix for variables, not null</a>
+<span class="sourceLineNo">296</span><a id="line.296">     * @param escape  the escape character</a>
+<span class="sourceLineNo">297</span><a id="line.297">     * @throws IllegalArgumentException if the prefix or suffix is null</a>
+<span class="sourceLineNo">298</span><a id="line.298">     */</a>
+<span class="sourceLineNo">299</span><a id="line.299">    public &lt;V&gt; StrSubstitutor(final Map&lt;String, V&gt; valueMap, final String prefix, final String suffix,</a>
+<span class="sourceLineNo">300</span><a id="line.300">                              final char escape) {</a>
+<span class="sourceLineNo">301</span><a id="line.301">        this(StrLookup.mapLookup(valueMap), prefix, suffix, escape);</a>
+<span class="sourceLineNo">302</span><a id="line.302">    }</a>
+<span class="sourceLineNo">303</span><a id="line.303"></a>
+<span class="sourceLineNo">304</span><a id="line.304">    /**</a>
+<span class="sourceLineNo">305</span><a id="line.305">     * Creates a new instance and initializes it.</a>
+<span class="sourceLineNo">306</span><a id="line.306">     *</a>
+<span class="sourceLineNo">307</span><a id="line.307">     * @param &lt;V&gt; the type of the values in the map</a>
+<span class="sourceLineNo">308</span><a id="line.308">     * @param valueMap  the map with the variables' values, may be null</a>
+<span class="sourceLineNo">309</span><a id="line.309">     * @param prefix  the prefix for variables, not null</a>
+<span class="sourceLineNo">310</span><a id="line.310">     * @param suffix  the suffix for variables, not null</a>
+<span class="sourceLineNo">311</span><a id="line.311">     * @param escape  the escape character</a>
+<span class="sourceLineNo">312</span><a id="line.312">     * @param valueDelimiter  the variable default value delimiter, may be null</a>
+<span class="sourceLineNo">313</span><a id="line.313">     * @throws IllegalArgumentException if the prefix or suffix is null</a>
+<span class="sourceLineNo">314</span><a id="line.314">     */</a>
+<span class="sourceLineNo">315</span><a id="line.315">    public &lt;V&gt; StrSubstitutor(final Map&lt;String, V&gt; valueMap, final String prefix, final String suffix,</a>
+<span class="sourceLineNo">316</span><a id="line.316">                              final char escape, final String valueDelimiter) {</a>
+<span class="sourceLineNo">317</span><a id="line.317">        this(StrLookup.mapLookup(valueMap), prefix, suffix, escape, valueDelimiter);</a>
+<span class="sourceLineNo">318</span><a id="line.318">    }</a>
+<span class="sourceLineNo">319</span><a id="line.319"></a>
+<span class="sourceLineNo">320</span><a id="line.320">    /**</a>
+<span class="sourceLineNo">321</span><a id="line.321">     * Creates a new instance and initializes it.</a>
+<span class="sourceLineNo">322</span><a id="line.322">     *</a>
+<span class="sourceLineNo">323</span><a id="line.323">     * @param variableResolver  the variable resolver, may be null</a>
+<span class="sourceLineNo">324</span><a id="line.324">     */</a>
+<span class="sourceLineNo">325</span><a id="line.325">    public StrSubstitutor(final StrLookup&lt;?&gt; variableResolver) {</a>
+<span class="sourceLineNo">326</span><a id="line.326">        this(variableResolver, DEFAULT_PREFIX, DEFAULT_SUFFIX, DEFAULT_ESCAPE);</a>
+<span class="sourceLineNo">327</span><a id="line.327">    }</a>
+<span class="sourceLineNo">328</span><a id="line.328"></a>
+<span class="sourceLineNo">329</span><a id="line.329">    /**</a>
+<span class="sourceLineNo">330</span><a id="line.330">     * Creates a new instance and initializes it.</a>
+<span class="sourceLineNo">331</span><a id="line.331">     *</a>
+<span class="sourceLineNo">332</span><a id="line.332">     * @param variableResolver  the variable resolver, may be null</a>
+<span class="sourceLineNo">333</span><a id="line.333">     * @param prefix  the prefix for variables, not null</a>
+<span class="sourceLineNo">334</span><a id="line.334">     * @param suffix  the suffix for variables, not null</a>
+<span class="sourceLineNo">335</span><a id="line.335">     * @param escape  the escape character</a>
+<span class="sourceLineNo">336</span><a id="line.336">     * @throws IllegalArgumentException if the prefix or suffix is null</a>
+<span class="sourceLineNo">337</span><a id="line.337">     */</a>
+<span class="sourceLineNo">338</span><a id="line.338">    public StrSubstitutor(final StrLookup&lt;?&gt; variableResolver, final String prefix, final String suffix,</a>
+<span class="sourceLineNo">339</span><a id="line.339">                          final char escape) {</a>
+<span class="sourceLineNo">340</span><a id="line.340">        this.setVariableResolver(variableResolver);</a>
+<span class="sourceLineNo">341</span><a id="line.341">        this.setVariablePrefix(prefix);</a>
+<span class="sourceLineNo">342</span><a id="line.342">        this.setVariableSuffix(suffix);</a>
+<span class="sourceLineNo">343</span><a id="line.343">        this.setEscapeChar(escape);</a>
+<span class="sourceLineNo">344</span><a id="line.344">        this.setValueDelimiterMatcher(DEFAULT_VALUE_DELIMITER);</a>
+<span class="sourceLineNo">345</span><a id="line.345">    }</a>
+<span class="sourceLineNo">346</span><a id="line.346"></a>
+<span class="sourceLineNo">347</span><a id="line.347">    /**</a>
+<span class="sourceLineNo">348</span><a id="line.348">     * Creates a new instance and initializes it.</a>
+<span class="sourceLineNo">349</span><a id="line.349">     *</a>
+<span class="sourceLineNo">350</span><a id="line.350">     * @param variableResolver  the variable resolver, may be null</a>
+<span class="sourceLineNo">351</span><a id="line.351">     * @param prefix  the prefix for variables, not null</a>
+<span class="sourceLineNo">352</span><a id="line.352">     * @param suffix  the suffix for variables, not null</a>
+<span class="sourceLineNo">353</span><a id="line.353">     * @param escape  the escape character</a>
+<span class="sourceLineNo">354</span><a id="line.354">     * @param valueDelimiter  the variable default value delimiter string, may be null</a>
+<span class="sourceLineNo">355</span><a id="line.355">     * @throws IllegalArgumentException if the prefix or suffix is null</a>
+<span class="sourceLineNo">356</span><a id="line.356">     */</a>
+<span class="sourceLineNo">357</span><a id="line.357">    public StrSubstitutor(final StrLookup&lt;?&gt; variableResolver, final String prefix, final String suffix,</a>
+<span class="sourceLineNo">358</span><a id="line.358">                          final char escape, final String valueDelimiter) {</a>
+<span class="sourceLineNo">359</span><a id="line.359">        this.setVariableResolver(variableResolver);</a>
+<span class="sourceLineNo">360</span><a id="line.360">        this.setVariablePrefix(prefix);</a>
+<span class="sourceLineNo">361</span><a id="line.361">        this.setVariableSuffix(suffix);</a>
+<span class="sourceLineNo">362</span><a id="line.362">        this.setEscapeChar(escape);</a>
+<span class="sourceLineNo">363</span><a id="line.363">        this.setValueDelimiter(valueDelimiter);</a>
+<span class="sourceLineNo">364</span><a id="line.364">    }</a>
+<span class="sourceLineNo">365</span><a id="line.365"></a>
+<span class="sourceLineNo">366</span><a id="line.366">    /**</a>
+<span class="sourceLineNo">367</span><a id="line.367">     * Creates a new instance and initializes it.</a>
+<span class="sourceLineNo">368</span><a id="line.368">     *</a>
+<span class="sourceLineNo">369</span><a id="line.369">     * @param variableResolver  the variable resolver, may be null</a>
+<span class="sourceLineNo">370</span><a id="line.370">     * @param prefixMatcher  the prefix for variables, not null</a>
+<span class="sourceLineNo">371</span><a id="line.371">     * @param suffixMatcher  the suffix for variables, not null</a>
+<span class="sourceLineNo">372</span><a id="line.372">     * @param escape  the escape character</a>
+<span class="sourceLineNo">373</span><a id="line.373">     * @throws IllegalArgumentException if the prefix or suffix is null</a>
+<span class="sourceLineNo">374</span><a id="line.374">     */</a>
+<span class="sourceLineNo">375</span><a id="line.375">    public StrSubstitutor(</a>
+<span class="sourceLineNo">376</span><a id="line.376">            final StrLookup&lt;?&gt; variableResolver, final StrMatcher prefixMatcher, final StrMatcher suffixMatcher,</a>
+<span class="sourceLineNo">377</span><a id="line.377">            final char escape) {</a>
+<span class="sourceLineNo">378</span><a id="line.378">        this(variableResolver, prefixMatcher, suffixMatcher, escape, DEFAULT_VALUE_DELIMITER);</a>
+<span class="sourceLineNo">379</span><a id="line.379">    }</a>
+<span class="sourceLineNo">380</span><a id="line.380"></a>
+<span class="sourceLineNo">381</span><a id="line.381">    /**</a>
+<span class="sourceLineNo">382</span><a id="line.382">     * Creates a new instance and initializes it.</a>
+<span class="sourceLineNo">383</span><a id="line.383">     *</a>
+<span class="sourceLineNo">384</span><a id="line.384">     * @param variableResolver  the variable resolver, may be null</a>
+<span class="sourceLineNo">385</span><a id="line.385">     * @param prefixMatcher  the prefix for variables, not null</a>
+<span class="sourceLineNo">386</span><a id="line.386">     * @param suffixMatcher  the suffix for variables, not null</a>
+<span class="sourceLineNo">387</span><a id="line.387">     * @param escape  the escape character</a>
+<span class="sourceLineNo">388</span><a id="line.388">     * @param valueDelimiterMatcher  the variable default value delimiter matcher, may be null</a>
+<span class="sourceLineNo">389</span><a id="line.389">     * @throws IllegalArgumentException if the prefix or suffix is null</a>
+<span class="sourceLineNo">390</span><a id="line.390">     */</a>
+<span class="sourceLineNo">391</span><a id="line.391">    public StrSubstitutor(</a>
+<span class="sourceLineNo">392</span><a id="line.392">            final StrLookup&lt;?&gt; variableResolver, final StrMatcher prefixMatcher, final StrMatcher suffixMatcher,</a>
+<span class="sourceLineNo">393</span><a id="line.393">            final char escape, final StrMatcher valueDelimiterMatcher) {</a>
+<span class="sourceLineNo">394</span><a id="line.394">        this.setVariableResolver(variableResolver);</a>
+<span class="sourceLineNo">395</span><a id="line.395">        this.setVariablePrefixMatcher(prefixMatcher);</a>
+<span class="sourceLineNo">396</span><a id="line.396">        this.setVariableSuffixMatcher(suffixMatcher);</a>
+<span class="sourceLineNo">397</span><a id="line.397">        this.setEscapeChar(escape);</a>
+<span class="sourceLineNo">398</span><a id="line.398">        this.setValueDelimiterMatcher(valueDelimiterMatcher);</a>
+<span class="sourceLineNo">399</span><a id="line.399">    }</a>
+<span class="sourceLineNo">400</span><a id="line.400"></a>
+<span class="sourceLineNo">401</span><a id="line.401">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">402</span><a id="line.402">    /**</a>
+<span class="sourceLineNo">403</span><a id="line.403">     * Replaces all the occurrences of variables with their matching values</a>
+<span class="sourceLineNo">404</span><a id="line.404">     * from the resolver using the given source string as a template.</a>
+<span class="sourceLineNo">405</span><a id="line.405">     *</a>
+<span class="sourceLineNo">406</span><a id="line.406">     * @param source  the string to replace in, null returns null</a>
+<span class="sourceLineNo">407</span><a id="line.407">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">408</span><a id="line.408">     */</a>
+<span class="sourceLineNo">409</span><a id="line.409">    public String replace(final String source) {</a>
+<span class="sourceLineNo">410</span><a id="line.410">        if (source == null) {</a>
+<span class="sourceLineNo">411</span><a id="line.411">            return null;</a>
+<span class="sourceLineNo">412</span><a id="line.412">        }</a>
+<span class="sourceLineNo">413</span><a id="line.413">        final StrBuilder buf = new StrBuilder(source);</a>
+<span class="sourceLineNo">414</span><a id="line.414">        if (!substitute(buf, 0, source.length())) {</a>
+<span class="sourceLineNo">415</span><a id="line.415">            return source;</a>
+<span class="sourceLineNo">416</span><a id="line.416">        }</a>
+<span class="sourceLineNo">417</span><a id="line.417">        return buf.toString();</a>
+<span class="sourceLineNo">418</span><a id="line.418">    }</a>
+<span class="sourceLineNo">419</span><a id="line.419"></a>
+<span class="sourceLineNo">420</span><a id="line.420">    /**</a>
+<span class="sourceLineNo">421</span><a id="line.421">     * Replaces all the occurrences of variables with their matching values</a>
+<span class="sourceLineNo">422</span><a id="line.422">     * from the resolver using the given source string as a template.</a>
+<span class="sourceLineNo">423</span><a id="line.423">     * &lt;p&gt;</a>
+<span class="sourceLineNo">424</span><a id="line.424">     * Only the specified portion of the string will be processed.</a>
+<span class="sourceLineNo">425</span><a id="line.425">     * The rest of the string is not processed, and is not returned.</a>
+<span class="sourceLineNo">426</span><a id="line.426">     *</a>
+<span class="sourceLineNo">427</span><a id="line.427">     * @param source  the string to replace in, null returns null</a>
+<span class="sourceLineNo">428</span><a id="line.428">     * @param offset  the start offset within the array, must be valid</a>
+<span class="sourceLineNo">429</span><a id="line.429">     * @param length  the length within the array to be processed, must be valid</a>
+<span class="sourceLineNo">430</span><a id="line.430">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">431</span><a id="line.431">     */</a>
+<span class="sourceLineNo">432</span><a id="line.432">    public String replace(final String source, final int offset, final int length) {</a>
+<span class="sourceLineNo">433</span><a id="line.433">        if (source == null) {</a>
+<span class="sourceLineNo">434</span><a id="line.434">            return null;</a>
+<span class="sourceLineNo">435</span><a id="line.435">        }</a>
+<span class="sourceLineNo">436</span><a id="line.436">        final StrBuilder buf = new StrBuilder(length).append(source, offset, length);</a>
+<span class="sourceLineNo">437</span><a id="line.437">        if (!substitute(buf, 0, length)) {</a>
+<span class="sourceLineNo">438</span><a id="line.438">            return source.substring(offset, offset + length);</a>
+<span class="sourceLineNo">439</span><a id="line.439">        }</a>
+<span class="sourceLineNo">440</span><a id="line.440">        return buf.toString();</a>
+<span class="sourceLineNo">441</span><a id="line.441">    }</a>
+<span class="sourceLineNo">442</span><a id="line.442"></a>
+<span class="sourceLineNo">443</span><a id="line.443">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">444</span><a id="line.444">    /**</a>
+<span class="sourceLineNo">445</span><a id="line.445">     * Replaces all the occurrences of variables with their matching values</a>
+<span class="sourceLineNo">446</span><a id="line.446">     * from the resolver using the given source array as a template.</a>
+<span class="sourceLineNo">447</span><a id="line.447">     * The array is not altered by this method.</a>
+<span class="sourceLineNo">448</span><a id="line.448">     *</a>
+<span class="sourceLineNo">449</span><a id="line.449">     * @param source  the character array to replace in, not altered, null returns null</a>
+<span class="sourceLineNo">450</span><a id="line.450">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">451</span><a id="line.451">     */</a>
+<span class="sourceLineNo">452</span><a id="line.452">    public String replace(final char[] source) {</a>
+<span class="sourceLineNo">453</span><a id="line.453">        if (source == null) {</a>
+<span class="sourceLineNo">454</span><a id="line.454">            return null;</a>
+<span class="sourceLineNo">455</span><a id="line.455">        }</a>
+<span class="sourceLineNo">456</span><a id="line.456">        final StrBuilder buf = new StrBuilder(source.length).append(source);</a>
+<span class="sourceLineNo">457</span><a id="line.457">        substitute(buf, 0, source.length);</a>
+<span class="sourceLineNo">458</span><a id="line.458">        return buf.toString();</a>
+<span class="sourceLineNo">459</span><a id="line.459">    }</a>
+<span class="sourceLineNo">460</span><a id="line.460"></a>
+<span class="sourceLineNo">461</span><a id="line.461">    /**</a>
+<span class="sourceLineNo">462</span><a id="line.462">     * Replaces all the occurrences of variables with their matching values</a>
+<span class="sourceLineNo">463</span><a id="line.463">     * from the resolver using the given source array as a template.</a>
+<span class="sourceLineNo">464</span><a id="line.464">     * The array is not altered by this method.</a>
+<span class="sourceLineNo">465</span><a id="line.465">     * &lt;p&gt;</a>
+<span class="sourceLineNo">466</span><a id="line.466">     * Only the specified portion of the array will be processed.</a>
+<span class="sourceLineNo">467</span><a id="line.467">     * The rest of the array is not processed, and is not returned.</a>
+<span class="sourceLineNo">468</span><a id="line.468">     *</a>
+<span class="sourceLineNo">469</span><a id="line.469">     * @param source  the character array to replace in, not altered, null returns null</a>
+<span class="sourceLineNo">470</span><a id="line.470">     * @param offset  the start offset within the array, must be valid</a>
+<span class="sourceLineNo">471</span><a id="line.471">     * @param length  the length within the array to be processed, must be valid</a>
+<span class="sourceLineNo">472</span><a id="line.472">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">473</span><a id="line.473">     */</a>
+<span class="sourceLineNo">474</span><a id="line.474">    public String replace(final char[] source, final int offset, final int length) {</a>
+<span class="sourceLineNo">475</span><a id="line.475">        if (source == null) {</a>
+<span class="sourceLineNo">476</span><a id="line.476">            return null;</a>
+<span class="sourceLineNo">477</span><a id="line.477">        }</a>
+<span class="sourceLineNo">478</span><a id="line.478">        final StrBuilder buf = new StrBuilder(length).append(source, offset, length);</a>
+<span class="sourceLineNo">479</span><a id="line.479">        substitute(buf, 0, length);</a>
+<span class="sourceLineNo">480</span><a id="line.480">        return buf.toString();</a>
+<span class="sourceLineNo">481</span><a id="line.481">    }</a>
+<span class="sourceLineNo">482</span><a id="line.482"></a>
+<span class="sourceLineNo">483</span><a id="line.483">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">484</span><a id="line.484">    /**</a>
+<span class="sourceLineNo">485</span><a id="line.485">     * Replaces all the occurrences of variables with their matching values</a>
+<span class="sourceLineNo">486</span><a id="line.486">     * from the resolver using the given source buffer as a template.</a>
+<span class="sourceLineNo">487</span><a id="line.487">     * The buffer is not altered by this method.</a>
+<span class="sourceLineNo">488</span><a id="line.488">     *</a>
+<span class="sourceLineNo">489</span><a id="line.489">     * @param source  the buffer to use as a template, not changed, null returns null</a>
+<span class="sourceLineNo">490</span><a id="line.490">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">491</span><a id="line.491">     */</a>
+<span class="sourceLineNo">492</span><a id="line.492">    public String replace(final StringBuffer source) {</a>
+<span class="sourceLineNo">493</span><a id="line.493">        if (source == null) {</a>
+<span class="sourceLineNo">494</span><a id="line.494">            return null;</a>
+<span class="sourceLineNo">495</span><a id="line.495">        }</a>
+<span class="sourceLineNo">496</span><a id="line.496">        final StrBuilder buf = new StrBuilder(source.length()).append(source);</a>
+<span class="sourceLineNo">497</span><a id="line.497">        substitute(buf, 0, buf.length());</a>
+<span class="sourceLineNo">498</span><a id="line.498">        return buf.toString();</a>
+<span class="sourceLineNo">499</span><a id="line.499">    }</a>
+<span class="sourceLineNo">500</span><a id="line.500"></a>
+<span class="sourceLineNo">501</span><a id="line.501">    /**</a>
+<span class="sourceLineNo">502</span><a id="line.502">     * Replaces all the occurrences of variables with their matching values</a>
+<span class="sourceLineNo">503</span><a id="line.503">     * from the resolver using the given source buffer as a template.</a>
+<span class="sourceLineNo">504</span><a id="line.504">     * The buffer is not altered by this method.</a>
+<span class="sourceLineNo">505</span><a id="line.505">     * &lt;p&gt;</a>
+<span class="sourceLineNo">506</span><a id="line.506">     * Only the specified portion of the buffer will be processed.</a>
+<span class="sourceLineNo">507</span><a id="line.507">     * The rest of the buffer is not processed, and is not returned.</a>
+<span class="sourceLineNo">508</span><a id="line.508">     *</a>
+<span class="sourceLineNo">509</span><a id="line.509">     * @param source  the buffer to use as a template, not changed, null returns null</a>
+<span class="sourceLineNo">510</span><a id="line.510">     * @param offset  the start offset within the array, must be valid</a>
+<span class="sourceLineNo">511</span><a id="line.511">     * @param length  the length within the array to be processed, must be valid</a>
+<span class="sourceLineNo">512</span><a id="line.512">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">513</span><a id="line.513">     */</a>
+<span class="sourceLineNo">514</span><a id="line.514">    public String replace(final StringBuffer source, final int offset, final int length) {</a>
+<span class="sourceLineNo">515</span><a id="line.515">        if (source == null) {</a>
+<span class="sourceLineNo">516</span><a id="line.516">            return null;</a>
+<span class="sourceLineNo">517</span><a id="line.517">        }</a>
+<span class="sourceLineNo">518</span><a id="line.518">        final StrBuilder buf = new StrBuilder(length).append(source, offset, length);</a>
+<span class="sourceLineNo">519</span><a id="line.519">        substitute(buf, 0, length);</a>
+<span class="sourceLineNo">520</span><a id="line.520">        return buf.toString();</a>
+<span class="sourceLineNo">521</span><a id="line.521">    }</a>
+<span class="sourceLineNo">522</span><a id="line.522"></a>
+<span class="sourceLineNo">523</span><a id="line.523">    /**</a>
+<span class="sourceLineNo">524</span><a id="line.524">     * Replaces all the occurrences of variables with their matching values</a>
+<span class="sourceLineNo">525</span><a id="line.525">     * from the resolver using the given source as a template.</a>
+<span class="sourceLineNo">526</span><a id="line.526">     * The source is not altered by this method.</a>
+<span class="sourceLineNo">527</span><a id="line.527">     *</a>
+<span class="sourceLineNo">528</span><a id="line.528">     * @param source  the buffer to use as a template, not changed, null returns null</a>
+<span class="sourceLineNo">529</span><a id="line.529">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">530</span><a id="line.530">     */</a>
+<span class="sourceLineNo">531</span><a id="line.531">    public String replace(final CharSequence source) {</a>
+<span class="sourceLineNo">532</span><a id="line.532">        if (source == null) {</a>
+<span class="sourceLineNo">533</span><a id="line.533">            return null;</a>
+<span class="sourceLineNo">534</span><a id="line.534">        }</a>
+<span class="sourceLineNo">535</span><a id="line.535">        return replace(source, 0, source.length());</a>
+<span class="sourceLineNo">536</span><a id="line.536">    }</a>
+<span class="sourceLineNo">537</span><a id="line.537"></a>
+<span class="sourceLineNo">538</span><a id="line.538">    /**</a>
+<span class="sourceLineNo">539</span><a id="line.539">     * Replaces all the occurrences of variables with their matching values</a>
+<span class="sourceLineNo">540</span><a id="line.540">     * from the resolver using the given source as a template.</a>
+<span class="sourceLineNo">541</span><a id="line.541">     * The source is not altered by this method.</a>
+<span class="sourceLineNo">542</span><a id="line.542">     * &lt;p&gt;</a>
+<span class="sourceLineNo">543</span><a id="line.543">     * Only the specified portion of the buffer will be processed.</a>
+<span class="sourceLineNo">544</span><a id="line.544">     * The rest of the buffer is not processed, and is not returned.</a>
+<span class="sourceLineNo">545</span><a id="line.545">     *</a>
+<span class="sourceLineNo">546</span><a id="line.546">     * @param source  the buffer to use as a template, not changed, null returns null</a>
+<span class="sourceLineNo">547</span><a id="line.547">     * @param offset  the start offset within the array, must be valid</a>
+<span class="sourceLineNo">548</span><a id="line.548">     * @param length  the length within the array to be processed, must be valid</a>
+<span class="sourceLineNo">549</span><a id="line.549">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">550</span><a id="line.550">     */</a>
+<span class="sourceLineNo">551</span><a id="line.551">    public String replace(final CharSequence source, final int offset, final int length) {</a>
+<span class="sourceLineNo">552</span><a id="line.552">        if (source == null) {</a>
+<span class="sourceLineNo">553</span><a id="line.553">            return null;</a>
+<span class="sourceLineNo">554</span><a id="line.554">        }</a>
+<span class="sourceLineNo">555</span><a id="line.555">        final StrBuilder buf = new StrBuilder(length).append(source, offset, length);</a>
+<span class="sourceLineNo">556</span><a id="line.556">        substitute(buf, 0, length);</a>
+<span class="sourceLineNo">557</span><a id="line.557">        return buf.toString();</a>
+<span class="sourceLineNo">558</span><a id="line.558">    }</a>
+<span class="sourceLineNo">559</span><a id="line.559"></a>
+<span class="sourceLineNo">560</span><a id="line.560">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">561</span><a id="line.561">    /**</a>
+<span class="sourceLineNo">562</span><a id="line.562">     * Replaces all the occurrences of variables with their matching values</a>
+<span class="sourceLineNo">563</span><a id="line.563">     * from the resolver using the given source builder as a template.</a>
+<span class="sourceLineNo">564</span><a id="line.564">     * The builder is not altered by this method.</a>
+<span class="sourceLineNo">565</span><a id="line.565">     *</a>
+<span class="sourceLineNo">566</span><a id="line.566">     * @param source  the builder to use as a template, not changed, null returns null</a>
+<span class="sourceLineNo">567</span><a id="line.567">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">568</span><a id="line.568">     */</a>
+<span class="sourceLineNo">569</span><a id="line.569">    public String replace(final StrBuilder source) {</a>
+<span class="sourceLineNo">570</span><a id="line.570">        if (source == null) {</a>
+<span class="sourceLineNo">571</span><a id="line.571">            return null;</a>
+<span class="sourceLineNo">572</span><a id="line.572">        }</a>
+<span class="sourceLineNo">573</span><a id="line.573">        final StrBuilder buf = new StrBuilder(source.length()).append(source);</a>
+<span class="sourceLineNo">574</span><a id="line.574">        substitute(buf, 0, buf.length());</a>
+<span class="sourceLineNo">575</span><a id="line.575">        return buf.toString();</a>
+<span class="sourceLineNo">576</span><a id="line.576">    }</a>
+<span class="sourceLineNo">577</span><a id="line.577"></a>
+<span class="sourceLineNo">578</span><a id="line.578">    /**</a>
+<span class="sourceLineNo">579</span><a id="line.579">     * Replaces all the occurrences of variables with their matching values</a>
+<span class="sourceLineNo">580</span><a id="line.580">     * from the resolver using the given source builder as a template.</a>
+<span class="sourceLineNo">581</span><a id="line.581">     * The builder is not altered by this method.</a>
+<span class="sourceLineNo">582</span><a id="line.582">     * &lt;p&gt;</a>
+<span class="sourceLineNo">583</span><a id="line.583">     * Only the specified portion of the builder will be processed.</a>
+<span class="sourceLineNo">584</span><a id="line.584">     * The rest of the builder is not processed, and is not returned.</a>
+<span class="sourceLineNo">585</span><a id="line.585">     *</a>
+<span class="sourceLineNo">586</span><a id="line.586">     * @param source  the builder to use as a template, not changed, null returns null</a>
+<span class="sourceLineNo">587</span><a id="line.587">     * @param offset  the start offset within the array, must be valid</a>
+<span class="sourceLineNo">588</span><a id="line.588">     * @param length  the length within the array to be processed, must be valid</a>
+<span class="sourceLineNo">589</span><a id="line.589">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">590</span><a id="line.590">     */</a>
+<span class="sourceLineNo">591</span><a id="line.591">    public String replace(final StrBuilder source, final int offset, final int length) {</a>
+<span class="sourceLineNo">592</span><a id="line.592">        if (source == null) {</a>
+<span class="sourceLineNo">593</span><a id="line.593">            return null;</a>
+<span class="sourceLineNo">594</span><a id="line.594">        }</a>
+<span class="sourceLineNo">595</span><a id="line.595">        final StrBuilder buf = new StrBuilder(length).append(source, offset, length);</a>
+<span class="sourceLineNo">596</span><a id="line.596">        substitute(buf, 0, length);</a>
+<span class="sourceLineNo">597</span><a id="line.597">        return buf.toString();</a>
+<span class="sourceLineNo">598</span><a id="line.598">    }</a>
+<span class="sourceLineNo">599</span><a id="line.599"></a>
+<span class="sourceLineNo">600</span><a id="line.600">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">601</span><a id="line.601">    /**</a>
+<span class="sourceLineNo">602</span><a id="line.602">     * Replaces all the occurrences of variables in the given source object with</a>
+<span class="sourceLineNo">603</span><a id="line.603">     * their matching values from the resolver. The input source object is</a>
+<span class="sourceLineNo">604</span><a id="line.604">     * converted to a string using &lt;code&gt;toString&lt;/code&gt; and is not altered.</a>
+<span class="sourceLineNo">605</span><a id="line.605">     *</a>
+<span class="sourceLineNo">606</span><a id="line.606">     * @param source  the source to replace in, null returns null</a>
+<span class="sourceLineNo">607</span><a id="line.607">     * @return the result of the replace operation</a>
+<span class="sourceLineNo">608</span><a id="line.608">     */</a>
+<span class="sourceLineNo">609</span><a id="line.609">    public String replace(final Object source) {</a>
+<span class="sourceLineNo">610</span><a id="line.610">        if (source == null) {</a>
+<span class="sourceLineNo">611</span><a id="line.611">            return null;</a>
+<span class="sourceLineNo">612</span><a id="line.612">        }</a>
+<span class="sourceLineNo">613</span><a id="line.613">        final StrBuilder buf = new StrBuilder().append(source);</a>
+<span class="sourceLineNo">614</span><a id="line.614">        substitute(buf, 0, buf.length());</a>
+<span class="sourceLineNo">615</span><a id="line.615">        return buf.toString();</a>
+<span class="sourceLineNo">616</span><a id="line.616">    }</a>
+<span class="sourceLineNo">617</span><a id="line.617"></a>
+<span class="sourceLineNo">618</span><a id="line.618">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">619</span><a id="line.619">    /**</a>
+<span class="sourceLineNo">620</span><a id="line.620">     * Replaces all the occurrences of variables within the given source buffer</a>
+<span class="sourceLineNo">621</span><a id="line.621">     * with their matching values from the resolver.</a>
+<span class="sourceLineNo">622</span><a id="line.622">     * The buffer is updated with the result.</a>
+<span class="sourceLineNo">623</span><a id="line.623">     *</a>
+<span class="sourceLineNo">624</span><a id="line.624">     * @param source  the buffer to replace in, updated, null returns zero</a>
+<span class="sourceLineNo">625</span><a id="line.625">     * @return true if altered</a>
+<span class="sourceLineNo">626</span><a id="line.626">     */</a>
+<span class="sourceLineNo">627</span><a id="line.627">    public boolean replaceIn(final StringBuffer source) {</a>
+<span class="sourceLineNo">628</span><a id="line.628">        if (source == null) {</a>
+<span class="sourceLineNo">629</span><a id="line.629">            return false;</a>
+<span class="sourceLineNo">630</span><a id="line.630">        }</a>
+<span class="sourceLineNo">631</span><a id="line.631">        return replaceIn(source, 0, source.length());</a>
+<span class="sourceLineNo">632</span><a id="line.632">    }</a>
+<span class="sourceLineNo">633</span><a id="line.633"></a>
+<span class="sourceLineNo">634</span><a id="line.634">    /**</a>
+<span class="sourceLineNo">635</span><a id="line.635">     * Replaces all the occurrences of variables within the given source buffer</a>
+<span class="sourceLineNo">636</span><a id="line.636">     * with their matching values from the resolver.</a>
+<span class="sourceLineNo">637</span><a id="line.637">     * The buffer is updated with the result.</a>
+<span class="sourceLineNo">638</span><a id="line.638">     * &lt;p&gt;</a>
+<span class="sourceLineNo">639</span><a id="line.639">     * Only the specified portion of the buffer will be processed.</a>
+<span class="sourceLineNo">640</span><a id="line.640">     * The rest of the buffer is not processed, but it is not deleted.</a>
+<span class="sourceLineNo">641</span><a id="line.641">     *</a>
+<span class="sourceLineNo">642</span><a id="line.642">     * @param source  the buffer to replace in, updated, null returns zero</a>
+<span class="sourceLineNo">643</span><a id="line.643">     * @param offset  the start offset within the array, must be valid</a>
+<span class="sourceLineNo">644</span><a id="line.644">     * @param length  the length within the buffer to be processed, must be valid</a>
+<span class="sourceLineNo">645</span><a id="line.645">     * @return true if altered</a>
+<span class="sourceLineNo">646</span><a id="line.646">     */</a>
+<span class="sourceLineNo">647</span><a id="line.647">    public boolean replaceIn(final StringBuffer source, final int offset, final int length) {</a>
+<span class="sourceLineNo">648</span><a id="line.648">        if (source == null) {</a>
+<span class="sourceLineNo">649</span><a id="line.649">            return false;</a>
+<span class="sourceLineNo">650</span><a id="line.650">        }</a>
+<span class="sourceLineNo">651</span><a id="line.651">        final StrBuilder buf = new StrBuilder(length).append(source, offset, length);</a>
+<span class="sourceLineNo">652</span><a id="line.652">        if (!substitute(buf, 0, length)) {</a>
+<span class="sourceLineNo">653</span><a id="line.653">            return false;</a>
+<span class="sourceLineNo">654</span><a id="line.654">        }</a>
+<span class="sourceLineNo">655</span><a id="line.655">        source.replace(offset, offset + length, buf.toString());</a>
+<span class="sourceLineNo">656</span><a id="line.656">        return true;</a>
+<span class="sourceLineNo">657</span><a id="line.657">    }</a>
+<span class="sourceLineNo">658</span><a id="line.658"></a>
+<span class="sourceLineNo">659</span><a id="line.659">  //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">660</span><a id="line.660">    /**</a>
+<span class="sourceLineNo">661</span><a id="line.661">     * Replaces all the occurrences of variables within the given source buffer</a>
+<span class="sourceLineNo">662</span><a id="line.662">     * with their matching values from the resolver.</a>
+<span class="sourceLineNo">663</span><a id="line.663">     * The buffer is updated with the result.</a>
+<span class="sourceLineNo">664</span><a id="line.664">     *</a>
+<span class="sourceLineNo">665</span><a id="line.665">     * @param source  the buffer to replace in, updated, null returns zero</a>
+<span class="sourceLineNo">666</span><a id="line.666">     * @return true if altered</a>
+<span class="sourceLineNo">667</span><a id="line.667">     */</a>
+<span class="sourceLineNo">668</span><a id="line.668">    public boolean replaceIn(final StringBuilder source) {</a>
+<span class="sourceLineNo">669</span><a id="line.669">        if (source == null) {</a>
+<span class="sourceLineNo">670</span><a id="line.670">            return false;</a>
+<span class="sourceLineNo">671</span><a id="line.671">        }</a>
+<span class="sourceLineNo">672</span><a id="line.672">        return replaceIn(source, 0, source.length());</a>
+<span class="sourceLineNo">673</span><a id="line.673">    }</a>
+<span class="sourceLineNo">674</span><a id="line.674"></a>
+<span class="sourceLineNo">675</span><a id="line.675">    /**</a>
+<span class="sourceLineNo">676</span><a id="line.676">     * Replaces all the occurrences of variables within the given source builder</a>
+<span class="sourceLineNo">677</span><a id="line.677">     * with their matching values from the resolver.</a>
+<span class="sourceLineNo">678</span><a id="line.678">     * The builder is updated with the result.</a>
+<span class="sourceLineNo">679</span><a id="line.679">     * &lt;p&gt;</a>
+<span class="sourceLineNo">680</span><a id="line.680">     * Only the specified portion of the buffer will be processed.</a>
+<span class="sourceLineNo">681</span><a id="line.681">     * The rest of the buffer is not processed, but it is not deleted.</a>
+<span class="sourceLineNo">682</span><a id="line.682">     *</a>
+<span class="sourceLineNo">683</span><a id="line.683">     * @param source  the buffer to replace in, updated, null returns zero</a>
+<span class="sourceLineNo">684</span><a id="line.684">     * @param offset  the start offset within the array, must be valid</a>
+<span class="sourceLineNo">685</span><a id="line.685">     * @param length  the length within the buffer to be processed, must be valid</a>
+<span class="sourceLineNo">686</span><a id="line.686">     * @return true if altered</a>
+<span class="sourceLineNo">687</span><a id="line.687">     */</a>
+<span class="sourceLineNo">688</span><a id="line.688">    public boolean replaceIn(final StringBuilder source, final int offset, final int length) {</a>
+<span class="sourceLineNo">689</span><a id="line.689">        if (source == null) {</a>
+<span class="sourceLineNo">690</span><a id="line.690">            return false;</a>
+<span class="sourceLineNo">691</span><a id="line.691">        }</a>
+<span class="sourceLineNo">692</span><a id="line.692">        final StrBuilder buf = new StrBuilder(length).append(source, offset, length);</a>
+<span class="sourceLineNo">693</span><a id="line.693">        if (!substitute(buf, 0, length)) {</a>
+<span class="sourceLineNo">694</span><a id="line.694">            return false;</a>
+<span class="sourceLineNo">695</span><a id="line.695">        }</a>
+<span class="sourceLineNo">696</span><a id="line.696">        source.replace(offset, offset + length, buf.toString());</a>
+<span class="sourceLineNo">697</span><a id="line.697">        return true;</a>
+<span class="sourceLineNo">698</span><a id="line.698">    }</a>
+<span class="sourceLineNo">699</span><a id="line.699"></a>
+<span class="sourceLineNo">700</span><a id="line.700">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">701</span><a id="line.701">    /**</a>
+<span class="sourceLineNo">702</span><a id="line.702">     * Replaces all the occurrences of variables within the given source</a>
+<span class="sourceLineNo">703</span><a id="line.703">     * builder with their matching values from the resolver.</a>
+<span class="sourceLineNo">704</span><a id="line.704">     *</a>
+<span class="sourceLineNo">705</span><a id="line.705">     * @param source  the builder to replace in, updated, null returns zero</a>
+<span class="sourceLineNo">706</span><a id="line.706">     * @return true if altered</a>
+<span class="sourceLineNo">707</span><a id="line.707">     */</a>
+<span class="sourceLineNo">708</span><a id="line.708">    public boolean replaceIn(final StrBuilder source) {</a>
+<span class="sourceLineNo">709</span><a id="line.709">        if (source == null) {</a>
+<span class="sourceLineNo">710</span><a id="line.710">            return false;</a>
+<span class="sourceLineNo">711</span><a id="line.711">        }</a>
+<span class="sourceLineNo">712</span><a id="line.712">        return substitute(source, 0, source.length());</a>
+<span class="sourceLineNo">713</span><a id="line.713">    }</a>
+<span class="sourceLineNo">714</span><a id="line.714"></a>
+<span class="sourceLineNo">715</span><a id="line.715">    /**</a>
+<span class="sourceLineNo">716</span><a id="line.716">     * Replaces all the occurrences of variables within the given source</a>
+<span class="sourceLineNo">717</span><a id="line.717">     * builder with their matching values from the resolver.</a>
+<span class="sourceLineNo">718</span><a id="line.718">     * &lt;p&gt;</a>
+<span class="sourceLineNo">719</span><a id="line.719">     * Only the specified portion of the builder will be processed.</a>
+<span class="sourceLineNo">720</span><a id="line.720">     * The rest of the builder is not processed, but it is not deleted.</a>
+<span class="sourceLineNo">721</span><a id="line.721">     *</a>
+<span class="sourceLineNo">722</span><a id="line.722">     * @param source  the builder to replace in, null returns zero</a>
+<span class="sourceLineNo">723</span><a id="line.723">     * @param offset  the start offset within the array, must be valid</a>
+<span class="sourceLineNo">724</span><a id="line.724">     * @param length  the length within the builder to be processed, must be valid</a>
+<span class="sourceLineNo">725</span><a id="line.725">     * @return true if altered</a>
+<span class="sourceLineNo">726</span><a id="line.726">     */</a>
+<span class="sourceLineNo">727</span><a id="line.727">    public boolean replaceIn(final StrBuilder source, final int offset, final int length) {</a>
+<span class="sourceLineNo">728</span><a id="line.728">        if (source == null) {</a>
+<span class="sourceLineNo">729</span><a id="line.729">            return false;</a>
+<span class="sourceLineNo">730</span><a id="line.730">        }</a>
+<span class="sourceLineNo">731</span><a id="line.731">        return substitute(source, offset, length);</a>
+<span class="sourceLineNo">732</span><a id="line.732">    }</a>
+<span class="sourceLineNo">733</span><a id="line.733"></a>
+<span class="sourceLineNo">734</span><a id="line.734">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">735</span><a id="line.735">    /**</a>
+<span class="sourceLineNo">736</span><a id="line.736">     * Internal method that substitutes the variables.</a>
+<span class="sourceLineNo">737</span><a id="line.737">     * &lt;p&gt;</a>
+<span class="sourceLineNo">738</span><a id="line.738">     * Most users of this class do not need to call this method. This method will</a>
+<span class="sourceLineNo">739</span><a id="line.739">     * be called automatically by another (public) method.</a>
+<span class="sourceLineNo">740</span><a id="line.740">     * &lt;p&gt;</a>
+<span class="sourceLineNo">741</span><a id="line.741">     * Writers of subclasses can override this method if they need access to</a>
+<span class="sourceLineNo">742</span><a id="line.742">     * the substitution process at the start or end.</a>
+<span class="sourceLineNo">743</span><a id="line.743">     *</a>
+<span class="sourceLineNo">744</span><a id="line.744">     * @param buf  the string builder to substitute into, not null</a>
+<span class="sourceLineNo">745</span><a id="line.745">     * @param offset  the start offset within the builder, must be valid</a>
+<span class="sourceLineNo">746</span><a id="line.746">     * @param length  the length within the builder to be processed, must be valid</a>
+<span class="sourceLineNo">747</span><a id="line.747">     * @return true if altered</a>
+<span class="sourceLineNo">748</span><a id="line.748">     */</a>
+<span class="sourceLineNo">749</span><a id="line.749">    protected boolean substitute(final StrBuilder buf, final int offset, final int length) {</a>
+<span class="sourceLineNo">750</span><a id="line.750">        return substitute(buf, offset, length, null) &gt; 0;</a>
+<span class="sourceLineNo">751</span><a id="line.751">    }</a>
+<span class="sourceLineNo">752</span><a id="line.752"></a>
+<span class="sourceLineNo">753</span><a id="line.753">    /**</a>
+<span class="sourceLineNo">754</span><a id="line.754">     * Recursive handler for multiple levels of interpolation. This is the main</a>
+<span class="sourceLineNo">755</span><a id="line.755">     * interpolation method, which resolves the values of all variable references</a>
+<span class="sourceLineNo">756</span><a id="line.756">     * contained in the passed in text.</a>
+<span class="sourceLineNo">757</span><a id="line.757">     *</a>
+<span class="sourceLineNo">758</span><a id="line.758">     * @param buf  the string builder to substitute into, not null</a>
+<span class="sourceLineNo">759</span><a id="line.759">     * @param offset  the start offset within the builder, must be valid</a>
+<span class="sourceLineNo">760</span><a id="line.760">     * @param length  the length within the builder to be processed, must be valid</a>
+<span class="sourceLineNo">761</span><a id="line.761">     * @param priorVariables  the stack keeping track of the replaced variables, may be null</a>
+<span class="sourceLineNo">762</span><a id="line.762">     * @return the length change that occurs, unless priorVariables is null when the int</a>
+<span class="sourceLineNo">763</span><a id="line.763">     *  represents a boolean flag as to whether any change occurred.</a>
+<span class="sourceLineNo">764</span><a id="line.764">     */</a>
+<span class="sourceLineNo">765</span><a id="line.765">    private int substitute(final StrBuilder buf, final int offset, final int length, List&lt;String&gt; priorVariables) {</a>
+<span class="sourceLineNo">766</span><a id="line.766">        final StrMatcher pfxMatcher = getVariablePrefixMatcher();</a>
+<span class="sourceLineNo">767</span><a id="line.767">        final StrMatcher suffMatcher = getVariableSuffixMatcher();</a>
+<span class="sourceLineNo">768</span><a id="line.768">        final char escape = getEscapeChar();</a>
+<span class="sourceLineNo">769</span><a id="line.769">        final StrMatcher valueDelimMatcher = getValueDelimiterMatcher();</a>
+<span class="sourceLineNo">770</span><a id="line.770">        final boolean substitutionInVariablesEnabled = isEnableSubstitutionInVariables();</a>
+<span class="sourceLineNo">771</span><a id="line.771">        final boolean substitutionInValuesDisabled = isDisableSubstitutionInValues();</a>
+<span class="sourceLineNo">772</span><a id="line.772"></a>
+<span class="sourceLineNo">773</span><a id="line.773">        final boolean top = priorVariables == null;</a>
+<span class="sourceLineNo">774</span><a id="line.774">        boolean altered = false;</a>
+<span class="sourceLineNo">775</span><a id="line.775">        int lengthChange = 0;</a>
+<span class="sourceLineNo">776</span><a id="line.776">        char[] chars = buf.buffer;</a>
+<span class="sourceLineNo">777</span><a id="line.777">        int bufEnd = offset + length;</a>
+<span class="sourceLineNo">778</span><a id="line.778">        int pos = offset;</a>
+<span class="sourceLineNo">779</span><a id="line.779">        while (pos &lt; bufEnd) {</a>
+<span class="sourceLineNo">780</span><a id="line.780">            final int startMatchLen = pfxMatcher.isMatch(chars, pos, offset,</a>
+<span class="sourceLineNo">781</span><a id="line.781">                    bufEnd);</a>
+<span class="sourceLineNo">782</span><a id="line.782">            if (startMatchLen == 0) {</a>
+<span class="sourceLineNo">783</span><a id="line.783">                pos++;</a>
+<span class="sourceLineNo">784</span><a id="line.784">            } else {</a>
+<span class="sourceLineNo">785</span><a id="line.785">                // found variable start marker</a>
+<span class="sourceLineNo">786</span><a id="line.786">                if (pos &gt; offset &amp;&amp; chars[pos - 1] == escape) {</a>
+<span class="sourceLineNo">787</span><a id="line.787">                    // escaped</a>
+<span class="sourceLineNo">788</span><a id="line.788">                    if (preserveEscapes) {</a>
+<span class="sourceLineNo">789</span><a id="line.789">                        pos++;</a>
+<span class="sourceLineNo">790</span><a id="line.790">                        continue;</a>
+<span class="sourceLineNo">791</span><a id="line.791">                    }</a>
+<span class="sourceLineNo">792</span><a id="line.792">                    buf.deleteCharAt(pos - 1);</a>
+<span class="sourceLineNo">793</span><a id="line.793">                    chars = buf.buffer; // in case buffer was altered</a>
+<span class="sourceLineNo">794</span><a id="line.794">                    lengthChange--;</a>
+<span class="sourceLineNo">795</span><a id="line.795">                    altered = true;</a>
+<span class="sourceLineNo">796</span><a id="line.796">                    bufEnd--;</a>
+<span class="sourceLineNo">797</span><a id="line.797">                } else {</a>
+<span class="sourceLineNo">798</span><a id="line.798">                    // find suffix</a>
+<span class="sourceLineNo">799</span><a id="line.799">                    final int startPos = pos;</a>
+<span class="sourceLineNo">800</span><a id="line.800">                    pos += startMatchLen;</a>
+<span class="sourceLineNo">801</span><a id="line.801">                    int endMatchLen = 0;</a>
+<span class="sourceLineNo">802</span><a id="line.802">                    int nestedVarCount = 0;</a>
+<span class="sourceLineNo">803</span><a id="line.803">                    while (pos &lt; bufEnd) {</a>
+<span class="sourceLineNo">804</span><a id="line.804">                        if (substitutionInVariablesEnabled</a>
+<span class="sourceLineNo">805</span><a id="line.805">                                &amp;&amp; pfxMatcher.isMatch(chars,</a>
+<span class="sourceLineNo">806</span><a id="line.806">                                        pos, offset, bufEnd) != 0) {</a>
+<span class="sourceLineNo">807</span><a id="line.807">                            // found a nested variable start</a>
+<span class="sourceLineNo">808</span><a id="line.808">                            endMatchLen = pfxMatcher.isMatch(chars,</a>
+<span class="sourceLineNo">809</span><a id="line.809">                                    pos, offset, bufEnd);</a>
+<span class="sourceLineNo">810</span><a id="line.810">                            nestedVarCount++;</a>
+<span class="sourceLineNo">811</span><a id="line.811">                            pos += endMatchLen;</a>
+<span class="sourceLineNo">812</span><a id="line.812">                            continue;</a>
+<span class="sourceLineNo">813</span><a id="line.813">                        }</a>
+<span class="sourceLineNo">814</span><a id="line.814"></a>
+<span class="sourceLineNo">815</span><a id="line.815">                        endMatchLen = suffMatcher.isMatch(chars, pos, offset,</a>
+<span class="sourceLineNo">816</span><a id="line.816">                                bufEnd);</a>
+<span class="sourceLineNo">817</span><a id="line.817">                        if (endMatchLen == 0) {</a>
+<span class="sourceLineNo">818</span><a id="line.818">                            pos++;</a>
+<span class="sourceLineNo">819</span><a id="line.819">                        } else {</a>
+<span class="sourceLineNo">820</span><a id="line.820">                            // found variable end marker</a>
+<span class="sourceLineNo">821</span><a id="line.821">                            if (nestedVarCount == 0) {</a>
+<span class="sourceLineNo">822</span><a id="line.822">                                String varNameExpr = new String(chars, startPos</a>
+<span class="sourceLineNo">823</span><a id="line.823">                                        + startMatchLen, pos - startPos</a>
+<span class="sourceLineNo">824</span><a id="line.824">                                        - startMatchLen);</a>
+<span class="sourceLineNo">825</span><a id="line.825">                                if (substitutionInVariablesEnabled) {</a>
+<span class="sourceLineNo">826</span><a id="line.826">                                    final StrBuilder bufName = new StrBuilder(varNameExpr);</a>
+<span class="sourceLineNo">827</span><a id="line.827">                                    substitute(bufName, 0, bufName.length());</a>
+<span class="sourceLineNo">828</span><a id="line.828">                                    varNameExpr = bufName.toString();</a>
+<span class="sourceLineNo">829</span><a id="line.829">                                }</a>
+<span class="sourceLineNo">830</span><a id="line.830">                                pos += endMatchLen;</a>
+<span class="sourceLineNo">831</span><a id="line.831">                                final int endPos = pos;</a>
+<span class="sourceLineNo">832</span><a id="line.832"></a>
+<span class="sourceLineNo">833</span><a id="line.833">                                String varName = varNameExpr;</a>
+<span class="sourceLineNo">834</span><a id="line.834">                                String varDefaultValue = null;</a>
+<span class="sourceLineNo">835</span><a id="line.835"></a>
+<span class="sourceLineNo">836</span><a id="line.836">                                if (valueDelimMatcher != null) {</a>
+<span class="sourceLineNo">837</span><a id="line.837">                                    final char[] varNameExprChars = varNameExpr.toCharArray();</a>
+<span class="sourceLineNo">838</span><a id="line.838">                                    int valueDelimiterMatchLen = 0;</a>
+<span class="sourceLineNo">839</span><a id="line.839">                                    for (int i = 0; i &lt; varNameExprChars.length; i++) {</a>
+<span class="sourceLineNo">840</span><a id="line.840">                                        // if there's any nested variable when nested variable substitution disabled,</a>
+<span class="sourceLineNo">841</span><a id="line.841">                                        // then stop resolving name and default value.</a>
+<span class="sourceLineNo">842</span><a id="line.842">                                        if (!substitutionInVariablesEnabled</a>
+<span class="sourceLineNo">843</span><a id="line.843">                                                &amp;&amp; pfxMatcher.isMatch(varNameExprChars,</a>
+<span class="sourceLineNo">844</span><a id="line.844">                                                                        i,</a>
+<span class="sourceLineNo">845</span><a id="line.845">                                                                        i,</a>
+<span class="sourceLineNo">846</span><a id="line.846">                                                                        varNameExprChars.length) != 0) {</a>
+<span class="sourceLineNo">847</span><a id="line.847">                                            break;</a>
+<span class="sourceLineNo">848</span><a id="line.848">                                        }</a>
+<span class="sourceLineNo">849</span><a id="line.849">                                        if (valueDelimMatcher.isMatch(varNameExprChars, i) != 0) {</a>
+<span class="sourceLineNo">850</span><a id="line.850">                                            valueDelimiterMatchLen = valueDelimMatcher.isMatch(varNameExprChars, i);</a>
+<span class="sourceLineNo">851</span><a id="line.851">                                            varName = varNameExpr.substring(0, i);</a>
+<span class="sourceLineNo">852</span><a id="line.852">                                            varDefaultValue = varNameExpr.substring(i + valueDelimiterMatchLen);</a>
+<span class="sourceLineNo">853</span><a id="line.853">                                            break;</a>
+<span class="sourceLineNo">854</span><a id="line.854">                                        }</a>
+<span class="sourceLineNo">855</span><a id="line.855">                                    }</a>
+<span class="sourceLineNo">856</span><a id="line.856">                                }</a>
+<span class="sourceLineNo">857</span><a id="line.857"></a>
+<span class="sourceLineNo">858</span><a id="line.858">                                // on the first call initialize priorVariables</a>
+<span class="sourceLineNo">859</span><a id="line.859">                                if (priorVariables == null) {</a>
+<span class="sourceLineNo">860</span><a id="line.860">                                    priorVariables = new ArrayList&lt;&gt;();</a>
+<span class="sourceLineNo">861</span><a id="line.861">                                    priorVariables.add(new String(chars,</a>
+<span class="sourceLineNo">862</span><a id="line.862">                                            offset, length));</a>
+<span class="sourceLineNo">863</span><a id="line.863">                                }</a>
+<span class="sourceLineNo">864</span><a id="line.864"></a>
+<span class="sourceLineNo">865</span><a id="line.865">                                // handle cyclic substitution</a>
+<span class="sourceLineNo">866</span><a id="line.866">                                checkCyclicSubstitution(varName, priorVariables);</a>
+<span class="sourceLineNo">867</span><a id="line.867">                                priorVariables.add(varName);</a>
+<span class="sourceLineNo">868</span><a id="line.868"></a>
+<span class="sourceLineNo">869</span><a id="line.869">                                // resolve the variable</a>
+<span class="sourceLineNo">870</span><a id="line.870">                                String varValue = resolveVariable(varName, buf,</a>
+<span class="sourceLineNo">871</span><a id="line.871">                                        startPos, endPos);</a>
+<span class="sourceLineNo">872</span><a id="line.872">                                if (varValue == null) {</a>
+<span class="sourceLineNo">873</span><a id="line.873">                                    varValue = varDefaultValue;</a>
+<span class="sourceLineNo">874</span><a id="line.874">                                }</a>
+<span class="sourceLineNo">875</span><a id="line.875">                                if (varValue != null) {</a>
+<span class="sourceLineNo">876</span><a id="line.876">                                    final int varLen = varValue.length();</a>
+<span class="sourceLineNo">877</span><a id="line.877">                                    buf.replace(startPos, endPos, varValue);</a>
+<span class="sourceLineNo">878</span><a id="line.878">                                    altered = true;</a>
+<span class="sourceLineNo">879</span><a id="line.879">                                    int change = 0;</a>
+<span class="sourceLineNo">880</span><a id="line.880">                                    if (!substitutionInValuesDisabled) { // recursive replace</a>
+<span class="sourceLineNo">881</span><a id="line.881">                                        change = substitute(buf, startPos,</a>
+<span class="sourceLineNo">882</span><a id="line.882">                                            varLen, priorVariables);</a>
+<span class="sourceLineNo">883</span><a id="line.883">                                    }</a>
+<span class="sourceLineNo">884</span><a id="line.884">                                    change = change</a>
+<span class="sourceLineNo">885</span><a id="line.885">                                        + varLen - (endPos - startPos);</a>
+<span class="sourceLineNo">886</span><a id="line.886">                                    pos += change;</a>
+<span class="sourceLineNo">887</span><a id="line.887">                                    bufEnd += change;</a>
+<span class="sourceLineNo">888</span><a id="line.888">                                    lengthChange += change;</a>
+<span class="sourceLineNo">889</span><a id="line.889">                                    chars = buf.buffer; // in case buffer was</a>
+<span class="sourceLineNo">890</span><a id="line.890">                                                        // altered</a>
+<span class="sourceLineNo">891</span><a id="line.891">                                }</a>
+<span class="sourceLineNo">892</span><a id="line.892"></a>
+<span class="sourceLineNo">893</span><a id="line.893">                                // remove variable from the cyclic stack</a>
+<span class="sourceLineNo">894</span><a id="line.894">                                priorVariables</a>
+<span class="sourceLineNo">895</span><a id="line.895">                                        .remove(priorVariables.size() - 1);</a>
+<span class="sourceLineNo">896</span><a id="line.896">                                break;</a>
+<span class="sourceLineNo">897</span><a id="line.897">                            }</a>
+<span class="sourceLineNo">898</span><a id="line.898">                            nestedVarCount--;</a>
+<span class="sourceLineNo">899</span><a id="line.899">                            pos += endMatchLen;</a>
+<span class="sourceLineNo">900</span><a id="line.900">                        }</a>
+<span class="sourceLineNo">901</span><a id="line.901">                    }</a>
+<span class="sourceLineNo">902</span><a id="line.902">                }</a>
+<span class="sourceLineNo">903</span><a id="line.903">            }</a>
+<span class="sourceLineNo">904</span><a id="line.904">        }</a>
+<span class="sourceLineNo">905</span><a id="line.905">        if (top) {</a>
+<span class="sourceLineNo">906</span><a id="line.906">            return altered ? 1 : 0;</a>
+<span class="sourceLineNo">907</span><a id="line.907">        }</a>
+<span class="sourceLineNo">908</span><a id="line.908">        return lengthChange;</a>
+<span class="sourceLineNo">909</span><a id="line.909">    }</a>
+<span class="sourceLineNo">910</span><a id="line.910"></a>
+<span class="sourceLineNo">911</span><a id="line.911">    /**</a>
+<span class="sourceLineNo">912</span><a id="line.912">     * Checks if the specified variable is already in the stack (list) of variables.</a>
+<span class="sourceLineNo">913</span><a id="line.913">     *</a>
+<span class="sourceLineNo">914</span><a id="line.914">     * @param varName  the variable name to check</a>
+<span class="sourceLineNo">915</span><a id="line.915">     * @param priorVariables  the list of prior variables</a>
+<span class="sourceLineNo">916</span><a id="line.916">     */</a>
+<span class="sourceLineNo">917</span><a id="line.917">    private void checkCyclicSubstitution(final String varName, final List&lt;String&gt; priorVariables) {</a>
+<span class="sourceLineNo">918</span><a id="line.918">        if (!priorVariables.contains(varName)) {</a>
+<span class="sourceLineNo">919</span><a id="line.919">            return;</a>
+<span class="sourceLineNo">920</span><a id="line.920">        }</a>
+<span class="sourceLineNo">921</span><a id="line.921">        final StrBuilder buf = new StrBuilder(256);</a>
+<span class="sourceLineNo">922</span><a id="line.922">        buf.append("Infinite loop in property interpolation of ");</a>
+<span class="sourceLineNo">923</span><a id="line.923">        buf.append(priorVariables.remove(0));</a>
+<span class="sourceLineNo">924</span><a id="line.924">        buf.append(": ");</a>
+<span class="sourceLineNo">925</span><a id="line.925">        buf.appendWithSeparators(priorVariables, "-&gt;");</a>
+<span class="sourceLineNo">926</span><a id="line.926">        throw new IllegalStateException(buf.toString());</a>
+<span class="sourceLineNo">927</span><a id="line.927">    }</a>
+<span class="sourceLineNo">928</span><a id="line.928"></a>
+<span class="sourceLineNo">929</span><a id="line.929">    /**</a>
+<span class="sourceLineNo">930</span><a id="line.930">     * Internal method that resolves the value of a variable.</a>
+<span class="sourceLineNo">931</span><a id="line.931">     * &lt;p&gt;</a>
+<span class="sourceLineNo">932</span><a id="line.932">     * Most users of this class do not need to call this method. This method is</a>
+<span class="sourceLineNo">933</span><a id="line.933">     * called automatically by the substitution process.</a>
+<span class="sourceLineNo">934</span><a id="line.934">     * &lt;p&gt;</a>
+<span class="sourceLineNo">935</span><a id="line.935">     * Writers of subclasses can override this method if they need to alter</a>
+<span class="sourceLineNo">936</span><a id="line.936">     * how each substitution occurs. The method is passed the variable's name</a>
+<span class="sourceLineNo">937</span><a id="line.937">     * and must return the corresponding value. This implementation uses the</a>
+<span class="sourceLineNo">938</span><a id="line.938">     * {@link #getVariableResolver()} with the variable's name as the key.</a>
+<span class="sourceLineNo">939</span><a id="line.939">     *</a>
+<span class="sourceLineNo">940</span><a id="line.940">     * @param variableName  the name of the variable, not null</a>
+<span class="sourceLineNo">941</span><a id="line.941">     * @param buf  the buffer where the substitution is occurring, not null</a>
+<span class="sourceLineNo">942</span><a id="line.942">     * @param startPos  the start position of the variable including the prefix, valid</a>
+<span class="sourceLineNo">943</span><a id="line.943">     * @param endPos  the end position of the variable including the suffix, valid</a>
+<span class="sourceLineNo">944</span><a id="line.944">     * @return the variable's value or &lt;b&gt;null&lt;/b&gt; if the variable is unknown</a>
+<span class="sourceLineNo">945</span><a id="line.945">     */</a>
+<span class="sourceLineNo">946</span><a id="line.946">    protected String resolveVariable(final String variableName,</a>
+<span class="sourceLineNo">947</span><a id="line.947">                                     final StrBuilder buf,</a>
+<span class="sourceLineNo">948</span><a id="line.948">                                     final int startPos,</a>
+<span class="sourceLineNo">949</span><a id="line.949">                                     final int endPos) {</a>
+<span class="sourceLineNo">950</span><a id="line.950">        final StrLookup&lt;?&gt; resolver = getVariableResolver();</a>
+<span class="sourceLineNo">951</span><a id="line.951">        if (resolver == null) {</a>
+<span class="sourceLineNo">952</span><a id="line.952">            return null;</a>
+<span class="sourceLineNo">953</span><a id="line.953">        }</a>
+<span class="sourceLineNo">954</span><a id="line.954">        return resolver.lookup(variableName);</a>
+<span class="sourceLineNo">955</span><a id="line.955">    }</a>
+<span class="sourceLineNo">956</span><a id="line.956"></a>
+<span class="sourceLineNo">957</span><a id="line.957">    // Escape</a>
+<span class="sourceLineNo">958</span><a id="line.958">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">959</span><a id="line.959">    /**</a>
+<span class="sourceLineNo">960</span><a id="line.960">     * Returns the escape character.</a>
+<span class="sourceLineNo">961</span><a id="line.961">     *</a>
+<span class="sourceLineNo">962</span><a id="line.962">     * @return the character used for escaping variable references</a>
+<span class="sourceLineNo">963</span><a id="line.963">     */</a>
+<span class="sourceLineNo">964</span><a id="line.964">    public char getEscapeChar() {</a>
+<span class="sourceLineNo">965</span><a id="line.965">        return this.escapeChar;</a>
+<span class="sourceLineNo">966</span><a id="line.966">    }</a>
+<span class="sourceLineNo">967</span><a id="line.967"></a>
+<span class="sourceLineNo">968</span><a id="line.968">    /**</a>
+<span class="sourceLineNo">969</span><a id="line.969">     * Sets the escape character.</a>
+<span class="sourceLineNo">970</span><a id="line.970">     * If this character is placed before a variable reference in the source</a>
+<span class="sourceLineNo">971</span><a id="line.971">     * text, this variable will be ignored.</a>
+<span class="sourceLineNo">972</span><a id="line.972">     *</a>
+<span class="sourceLineNo">973</span><a id="line.973">     * @param escapeCharacter  the escape character (0 for disabling escaping)</a>
+<span class="sourceLineNo">974</span><a id="line.974">     */</a>
+<span class="sourceLineNo">975</span><a id="line.975">    public void setEscapeChar(final char escapeCharacter) {</a>
+<span class="sourceLineNo">976</span><a id="line.976">        this.escapeChar = escapeCharacter;</a>
+<span class="sourceLineNo">977</span><a id="line.977">    }</a>
+<span class="sourceLineNo">978</span><a id="line.978"></a>
+<span class="sourceLineNo">979</span><a id="line.979">    // Prefix</a>
+<span class="sourceLineNo">980</span><a id="line.980">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">981</span><a id="line.981">    /**</a>
+<span class="sourceLineNo">982</span><a id="line.982">     * Gets the variable prefix matcher currently in use.</a>
+<span class="sourceLineNo">983</span><a id="line.983">     * &lt;p&gt;</a>
+<span class="sourceLineNo">984</span><a id="line.984">     * The variable prefix is the character or characters that identify the</a>
+<span class="sourceLineNo">985</span><a id="line.985">     * start of a variable. This prefix is expressed in terms of a matcher</a>
+<span class="sourceLineNo">986</span><a id="line.986">     * allowing advanced prefix matches.</a>
+<span class="sourceLineNo">987</span><a id="line.987">     *</a>
+<span class="sourceLineNo">988</span><a id="line.988">     * @return the prefix matcher in use</a>
+<span class="sourceLineNo">989</span><a id="line.989">     */</a>
+<span class="sourceLineNo">990</span><a id="line.990">    public StrMatcher getVariablePrefixMatcher() {</a>
+<span class="sourceLineNo">991</span><a id="line.991">        return prefixMatcher;</a>
+<span class="sourceLineNo">992</span><a id="line.992">    }</a>
+<span class="sourceLineNo">993</span><a id="line.993"></a>
+<span class="sourceLineNo">994</span><a id="line.994">    /**</a>
+<span class="sourceLineNo">995</span><a id="line.995">     * Sets the variable prefix matcher currently in use.</a>
+<span class="sourceLineNo">996</span><a id="line.996">     * &lt;p&gt;</a>
+<span class="sourceLineNo">997</span><a id="line.997">     * The variable prefix is the character or characters that identify the</a>
+<span class="sourceLineNo">998</span><a id="line.998">     * start of a variable. This prefix is expressed in terms of a matcher</a>
+<span class="sourceLineNo">999</span><a id="line.999">     * allowing advanced prefix matches.</a>
+<span class="sourceLineNo">1000</span><a id="line.1000">     *</a>
+<span class="sourceLineNo">1001</span><a id="line.1001">     * @param prefixMatcher  the prefix matcher to use, null ignored</a>
+<span class="sourceLineNo">1002</span><a id="line.1002">     * @return this, to enable chaining</a>
+<span class="sourceLineNo">1003</span><a id="line.1003">     * @throws IllegalArgumentException if the prefix matcher is null</a>
+<span class="sourceLineNo">1004</span><a id="line.1004">     */</a>
+<span class="sourceLineNo">1005</span><a id="line.1005">    public StrSubstitutor setVariablePrefixMatcher(final StrMatcher prefixMatcher) {</a>
+<span class="sourceLineNo">1006</span><a id="line.1006">        Validate.isTrue(prefixMatcher != null, "Variable prefix matcher must not be null!");</a>
+<span class="sourceLineNo">1007</span><a id="line.1007">        this.prefixMatcher = prefixMatcher;</a>
+<span class="sourceLineNo">1008</span><a id="line.1008">        return this;</a>
+<span class="sourceLineNo">1009</span><a id="line.1009">    }</a>
+<span class="sourceLineNo">1010</span><a id="line.1010"></a>
+<span class="sourceLineNo">1011</span><a id="line.1011">    /**</a>
+<span class="sourceLineNo">1012</span><a id="line.1012">     * Sets the variable prefix to use.</a>
+<span class="sourceLineNo">1013</span><a id="line.1013">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1014</span><a id="line.1014">     * The variable prefix is the character or characters that identify the</a>
+<span class="sourceLineNo">1015</span><a id="line.1015">     * start of a variable. This method allows a single character prefix to</a>
+<span class="sourceLineNo">1016</span><a id="line.1016">     * be easily set.</a>
+<span class="sourceLineNo">1017</span><a id="line.1017">     *</a>
+<span class="sourceLineNo">1018</span><a id="line.1018">     * @param prefix  the prefix character to use</a>
+<span class="sourceLineNo">1019</span><a id="line.1019">     * @return this, to enable chaining</a>
+<span class="sourceLineNo">1020</span><a id="line.1020">     */</a>
+<span class="sourceLineNo">1021</span><a id="line.1021">    public StrSubstitutor setVariablePrefix(final char prefix) {</a>
+<span class="sourceLineNo">1022</span><a id="line.1022">        return setVariablePrefixMatcher(StrMatcher.charMatcher(prefix));</a>
+<span class="sourceLineNo">1023</span><a id="line.1023">    }</a>
+<span class="sourceLineNo">1024</span><a id="line.1024"></a>
+<span class="sourceLineNo">1025</span><a id="line.1025">    /**</a>
+<span class="sourceLineNo">1026</span><a id="line.1026">     * Sets the variable prefix to use.</a>
+<span class="sourceLineNo">1027</span><a id="line.1027">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1028</span><a id="line.1028">     * The variable prefix is the character or characters that identify the</a>
+<span class="sourceLineNo">1029</span><a id="line.1029">     * start of a variable. This method allows a string prefix to be easily set.</a>
+<span class="sourceLineNo">1030</span><a id="line.1030">     *</a>
+<span class="sourceLineNo">1031</span><a id="line.1031">     * @param prefix  the prefix for variables, not null</a>
+<span class="sourceLineNo">1032</span><a id="line.1032">     * @return this, to enable chaining</a>
+<span class="sourceLineNo">1033</span><a id="line.1033">     * @throws IllegalArgumentException if the prefix is null</a>
+<span class="sourceLineNo">1034</span><a id="line.1034">     */</a>
+<span class="sourceLineNo">1035</span><a id="line.1035">    public StrSubstitutor setVariablePrefix(final String prefix) {</a>
+<span class="sourceLineNo">1036</span><a id="line.1036">        Validate.isTrue(prefix != null, "Variable prefix must not be null!");</a>
+<span class="sourceLineNo">1037</span><a id="line.1037">        return setVariablePrefixMatcher(StrMatcher.stringMatcher(prefix));</a>
+<span class="sourceLineNo">1038</span><a id="line.1038">    }</a>
+<span class="sourceLineNo">1039</span><a id="line.1039"></a>
+<span class="sourceLineNo">1040</span><a id="line.1040">    // Suffix</a>
+<span class="sourceLineNo">1041</span><a id="line.1041">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">1042</span><a id="line.1042">    /**</a>
+<span class="sourceLineNo">1043</span><a id="line.1043">     * Gets the variable suffix matcher currently in use.</a>
+<span class="sourceLineNo">1044</span><a id="line.1044">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1045</span><a id="line.1045">     * The variable suffix is the character or characters that identify the</a>
+<span class="sourceLineNo">1046</span><a id="line.1046">     * end of a variable. This suffix is expressed in terms of a matcher</a>
+<span class="sourceLineNo">1047</span><a id="line.1047">     * allowing advanced suffix matches.</a>
+<span class="sourceLineNo">1048</span><a id="line.1048">     *</a>
+<span class="sourceLineNo">1049</span><a id="line.1049">     * @return the suffix matcher in use</a>
+<span class="sourceLineNo">1050</span><a id="line.1050">     */</a>
+<span class="sourceLineNo">1051</span><a id="line.1051">    public StrMatcher getVariableSuffixMatcher() {</a>
+<span class="sourceLineNo">1052</span><a id="line.1052">        return suffixMatcher;</a>
+<span class="sourceLineNo">1053</span><a id="line.1053">    }</a>
+<span class="sourceLineNo">1054</span><a id="line.1054"></a>
+<span class="sourceLineNo">1055</span><a id="line.1055">    /**</a>
+<span class="sourceLineNo">1056</span><a id="line.1056">     * Sets the variable suffix matcher currently in use.</a>
+<span class="sourceLineNo">1057</span><a id="line.1057">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1058</span><a id="line.1058">     * The variable suffix is the character or characters that identify the</a>
+<span class="sourceLineNo">1059</span><a id="line.1059">     * end of a variable. This suffix is expressed in terms of a matcher</a>
+<span class="sourceLineNo">1060</span><a id="line.1060">     * allowing advanced suffix matches.</a>
+<span class="sourceLineNo">1061</span><a id="line.1061">     *</a>
+<span class="sourceLineNo">1062</span><a id="line.1062">     * @param suffixMatcher  the suffix matcher to use, null ignored</a>
+<span class="sourceLineNo">1063</span><a id="line.1063">     * @return this, to enable chaining</a>
+<span class="sourceLineNo">1064</span><a id="line.1064">     * @throws IllegalArgumentException if the suffix matcher is null</a>
+<span class="sourceLineNo">1065</span><a id="line.1065">     */</a>
+<span class="sourceLineNo">1066</span><a id="line.1066">    public StrSubstitutor setVariableSuffixMatcher(final StrMatcher suffixMatcher) {</a>
+<span class="sourceLineNo">1067</span><a id="line.1067">        Validate.isTrue(suffixMatcher != null, "Variable suffix matcher must not be null!");</a>
+<span class="sourceLineNo">1068</span><a id="line.1068">        this.suffixMatcher = suffixMatcher;</a>
+<span class="sourceLineNo">1069</span><a id="line.1069">        return this;</a>
+<span class="sourceLineNo">1070</span><a id="line.1070">    }</a>
+<span class="sourceLineNo">1071</span><a id="line.1071"></a>
+<span class="sourceLineNo">1072</span><a id="line.1072">    /**</a>
+<span class="sourceLineNo">1073</span><a id="line.1073">     * Sets the variable suffix to use.</a>
+<span class="sourceLineNo">1074</span><a id="line.1074">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1075</span><a id="line.1075">     * The variable suffix is the character or characters that identify the</a>
+<span class="sourceLineNo">1076</span><a id="line.1076">     * end of a variable. This method allows a single character suffix to</a>
+<span class="sourceLineNo">1077</span><a id="line.1077">     * be easily set.</a>
+<span class="sourceLineNo">1078</span><a id="line.1078">     *</a>
+<span class="sourceLineNo">1079</span><a id="line.1079">     * @param suffix  the suffix character to use</a>
+<span class="sourceLineNo">1080</span><a id="line.1080">     * @return this, to enable chaining</a>
+<span class="sourceLineNo">1081</span><a id="line.1081">     */</a>
+<span class="sourceLineNo">1082</span><a id="line.1082">    public StrSubstitutor setVariableSuffix(final char suffix) {</a>
+<span class="sourceLineNo">1083</span><a id="line.1083">        return setVariableSuffixMatcher(StrMatcher.charMatcher(suffix));</a>
+<span class="sourceLineNo">1084</span><a id="line.1084">    }</a>
+<span class="sourceLineNo">1085</span><a id="line.1085"></a>
+<span class="sourceLineNo">1086</span><a id="line.1086">    /**</a>
+<span class="sourceLineNo">1087</span><a id="line.1087">     * Sets the variable suffix to use.</a>
+<span class="sourceLineNo">1088</span><a id="line.1088">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1089</span><a id="line.1089">     * The variable suffix is the character or characters that identify the</a>
+<span class="sourceLineNo">1090</span><a id="line.1090">     * end of a variable. This method allows a string suffix to be easily set.</a>
+<span class="sourceLineNo">1091</span><a id="line.1091">     *</a>
+<span class="sourceLineNo">1092</span><a id="line.1092">     * @param suffix  the suffix for variables, not null</a>
+<span class="sourceLineNo">1093</span><a id="line.1093">     * @return this, to enable chaining</a>
+<span class="sourceLineNo">1094</span><a id="line.1094">     * @throws IllegalArgumentException if the suffix is null</a>
+<span class="sourceLineNo">1095</span><a id="line.1095">     */</a>
+<span class="sourceLineNo">1096</span><a id="line.1096">    public StrSubstitutor setVariableSuffix(final String suffix) {</a>
+<span class="sourceLineNo">1097</span><a id="line.1097">        Validate.isTrue(suffix != null, "Variable suffix must not be null!");</a>
+<span class="sourceLineNo">1098</span><a id="line.1098">        return setVariableSuffixMatcher(StrMatcher.stringMatcher(suffix));</a>
+<span class="sourceLineNo">1099</span><a id="line.1099">    }</a>
+<span class="sourceLineNo">1100</span><a id="line.1100"></a>
+<span class="sourceLineNo">1101</span><a id="line.1101">    // Variable Default Value Delimiter</a>
+<span class="sourceLineNo">1102</span><a id="line.1102">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">1103</span><a id="line.1103">    /**</a>
+<span class="sourceLineNo">1104</span><a id="line.1104">     * Gets the variable default value delimiter matcher currently in use.</a>
+<span class="sourceLineNo">1105</span><a id="line.1105">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1106</span><a id="line.1106">     * The variable default value delimiter is the character or characters that delimite the</a>
+<span class="sourceLineNo">1107</span><a id="line.1107">     * variable name and the variable default value. This delimiter is expressed in terms of a matcher</a>
+<span class="sourceLineNo">1108</span><a id="line.1108">     * allowing advanced variable default value delimiter matches.</a>
+<span class="sourceLineNo">1109</span><a id="line.1109">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1110</span><a id="line.1110">     * If it returns null, then the variable default value resolution is disabled.</a>
+<span class="sourceLineNo">1111</span><a id="line.1111">     *</a>
+<span class="sourceLineNo">1112</span><a id="line.1112">     * @return the variable default value delimiter matcher in use, may be null</a>
+<span class="sourceLineNo">1113</span><a id="line.1113">     */</a>
+<span class="sourceLineNo">1114</span><a id="line.1114">    public StrMatcher getValueDelimiterMatcher() {</a>
+<span class="sourceLineNo">1115</span><a id="line.1115">        return valueDelimiterMatcher;</a>
+<span class="sourceLineNo">1116</span><a id="line.1116">    }</a>
+<span class="sourceLineNo">1117</span><a id="line.1117"></a>
+<span class="sourceLineNo">1118</span><a id="line.1118">    /**</a>
+<span class="sourceLineNo">1119</span><a id="line.1119">     * Sets the variable default value delimiter matcher to use.</a>
+<span class="sourceLineNo">1120</span><a id="line.1120">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1121</span><a id="line.1121">     * The variable default value delimiter is the character or characters that delimite the</a>
+<span class="sourceLineNo">1122</span><a id="line.1122">     * variable name and the variable default value. This delimiter is expressed in terms of a matcher</a>
+<span class="sourceLineNo">1123</span><a id="line.1123">     * allowing advanced variable default value delimiter matches.</a>
+<span class="sourceLineNo">1124</span><a id="line.1124">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1125</span><a id="line.1125">     * If the &lt;code&gt;valueDelimiterMatcher&lt;/code&gt; is null, then the variable default value resolution</a>
+<span class="sourceLineNo">1126</span><a id="line.1126">     * becomes disabled.</a>
+<span class="sourceLineNo">1127</span><a id="line.1127">     *</a>
+<span class="sourceLineNo">1128</span><a id="line.1128">     * @param valueDelimiterMatcher  variable default value delimiter matcher to use, may be null</a>
+<span class="sourceLineNo">1129</span><a id="line.1129">     * @return this, to enable chaining</a>
+<span class="sourceLineNo">1130</span><a id="line.1130">     */</a>
+<span class="sourceLineNo">1131</span><a id="line.1131">    public StrSubstitutor setValueDelimiterMatcher(final StrMatcher valueDelimiterMatcher) {</a>
+<span class="sourceLineNo">1132</span><a id="line.1132">        this.valueDelimiterMatcher = valueDelimiterMatcher;</a>
+<span class="sourceLineNo">1133</span><a id="line.1133">        return this;</a>
+<span class="sourceLineNo">1134</span><a id="line.1134">    }</a>
+<span class="sourceLineNo">1135</span><a id="line.1135"></a>
+<span class="sourceLineNo">1136</span><a id="line.1136">    /**</a>
+<span class="sourceLineNo">1137</span><a id="line.1137">     * Sets the variable default value delimiter to use.</a>
+<span class="sourceLineNo">1138</span><a id="line.1138">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1139</span><a id="line.1139">     * The variable default value delimiter is the character or characters that delimite the</a>
+<span class="sourceLineNo">1140</span><a id="line.1140">     * variable name and the variable default value. This method allows a single character</a>
+<span class="sourceLineNo">1141</span><a id="line.1141">     * variable default value delimiter to be easily set.</a>
+<span class="sourceLineNo">1142</span><a id="line.1142">     *</a>
+<span class="sourceLineNo">1143</span><a id="line.1143">     * @param valueDelimiter  the variable default value delimiter character to use</a>
+<span class="sourceLineNo">1144</span><a id="line.1144">     * @return this, to enable chaining</a>
+<span class="sourceLineNo">1145</span><a id="line.1145">     */</a>
+<span class="sourceLineNo">1146</span><a id="line.1146">    public StrSubstitutor setValueDelimiter(final char valueDelimiter) {</a>
+<span class="sourceLineNo">1147</span><a id="line.1147">        return setValueDelimiterMatcher(StrMatcher.charMatcher(valueDelimiter));</a>
+<span class="sourceLineNo">1148</span><a id="line.1148">    }</a>
+<span class="sourceLineNo">1149</span><a id="line.1149"></a>
+<span class="sourceLineNo">1150</span><a id="line.1150">    /**</a>
+<span class="sourceLineNo">1151</span><a id="line.1151">     * Sets the variable default value delimiter to use.</a>
+<span class="sourceLineNo">1152</span><a id="line.1152">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1153</span><a id="line.1153">     * The variable default value delimiter is the character or characters that delimite the</a>
+<span class="sourceLineNo">1154</span><a id="line.1154">     * variable name and the variable default value. This method allows a string</a>
+<span class="sourceLineNo">1155</span><a id="line.1155">     * variable default value delimiter to be easily set.</a>
+<span class="sourceLineNo">1156</span><a id="line.1156">     * &lt;p&gt;</a>
+<span class="sourceLineNo">1157</span><a id="line.1157">     * If the &lt;code&gt;valueDelimiter&lt;/code&gt; is null or empty string, then the variable default</a>
+<span class="sourceLineNo">1158</span><a id="line.1158">     * value resolution becomes disabled.</a>
+<span class="sourceLineNo">1159</span><a id="line.1159">     *</a>
+<span class="sourceLineNo">1160</span><a id="line.1160">     * @param valueDelimiter  the variable default value delimiter string to use, may be null or empty</a>
+<span class="sourceLineNo">1161</span><a id="line.1161">     * @return this, to enable chaining</a>
+<span class="sourceLineNo">1162</span><a id="line.1162">     */</a>
+<span class="sourceLineNo">1163</span><a id="line.1163">    public StrSubstitutor setValueDelimiter(final String valueDelimiter) {</a>
+<span class="sourceLineNo">1164</span><a id="line.1164">        if (valueDelimiter == null || valueDelimiter.length() == 0) {</a>
+<span class="sourceLineNo">1165</span><a id="line.1165">            setValueDelimiterMatcher(null);</a>
+<span class="sourceLineNo">1166</span><a id="line.1166">            return this;</a>
+<span class="sourceLineNo">1167</span><a id="line.1167">        }</a>
+<span class="sourceLineNo">1168</span><a id="line.1168">        return setValueDelimiterMatcher(StrMatcher.stringMatcher(valueDelimiter));</a>
+<span class="sourceLineNo">1169</span><a id="line.1169">    }</a>
+<span class="sourceLineNo">1170</span><a id="line.1170"></a>
+<span class="sourceLineNo">1171</span><a id="line.1171">    // Resolver</a>
+<span class="sourceLineNo">1172</span><a id="line.1172">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">1173</span><a id="line.1173">    /**</a>
+<span class="sourceLineNo">1174</span><a id="line.1174">     * Gets the VariableResolver that is used to lookup variables.</a>
+<span class="sourceLineNo">1175</span><a id="line.1175">     *</a>
+<span class="sourceLineNo">1176</span><a id="line.1176">     * @return the VariableResolver</a>
+<span class="sourceLineNo">1177</span><a id="line.1177">     */</a>
+<span class="sourceLineNo">1178</span><a id="line.1178">    public StrLookup&lt;?&gt; getVariableResolver() {</a>
+<span class="sourceLineNo">1179</span><a id="line.1179">        return this.variableResolver;</a>
+<span class="sourceLineNo">1180</span><a id="line.1180">    }</a>
+<span class="sourceLineNo">1181</span><a id="line.1181"></a>
+<span class="sourceLineNo">1182</span><a id="line.1182">    /**</a>
+<span class="sourceLineNo">1183</span><a id="line.1183">     * Sets the VariableResolver that is used to lookup variables.</a>
+<span class="sourceLineNo">1184</span><a id="line.1184">     *</a>
+<span class="sourceLineNo">1185</span><a id="line.1185">     * @param variableResolver  the VariableResolver</a>
+<span class="sourceLineNo">1186</span><a id="line.1186">     */</a>
+<span class="sourceLineNo">1187</span><a id="line.1187">    public void setVariableResolver(final StrLookup&lt;?&gt; variableResolver) {</a>
+<span class="sourceLineNo">1188</span><a id="line.1188">        this.variableResolver = variableResolver;</a>
+<span class="sourceLineNo">1189</span><a id="line.1189">    }</a>
+<span class="sourceLineNo">1190</span><a id="line.1190"></a>
+<span class="sourceLineNo">1191</span><a id="line.1191">    // Substitution support in variable names</a>
+<span class="sourceLineNo">1192</span><a id="line.1192">    //-----------------------------------------------------------------------</a>
+<span class="sourceLineNo">1193</span><a id="line.1193">    /**</a>
+<span class="sourceLineNo">1194</span><a id="line.1194">     * Returns a flag whether substitution is done in variable names.</a>
+<span class="sourceLineNo">1195</span><a id="line.1195">     *</a>
+<span class="sourceLineNo">1196</span><a id="line.1196">     * @return the substitution in variable names flag</a>
+<span class="sourceLineNo">1197</span><a id="line.1197">     */</a>
+<span class="sourceLineNo">1198</span><a id="line.1198">    public boolean isEnableSubstitutionInVariables() {</a>
+<span class="sourceLineNo">1199</span><a id="line.1199">        return enableSubstitutionInVariables;</a>
+<span class="sourceLineNo">1200</span><a id="line.1200">    }</a>
+<span class="sourceLineNo">1201</span><a id="line.1201"></a>
+<span class="sourceLineNo">1202</span><a id="line.1202">    /**</a>
+<span class="sourceLineNo">1203</span><a id="line.1203">     * Sets a flag whether substitution is done in variable names. If set to</a>
+<span class="sourceLineNo">1204</span><a id="line.1204">     * &lt;b&gt;true&lt;/b&gt;, the names of variables can contain other variables which are</a>
+<span class="sourceLineNo">1205</span><a id="line.1205">     * processed first before the original variable is evaluated, e.g.</a>
+<span class="sourceLineNo">1206</span><a id="line.1206">     * &lt;code&gt;${jre-${java.version}}&lt;/code&gt;. The default value is &lt;b&gt;false&lt;/b&gt;.</a>
+<span class="sourceLineNo">1207</span><a id="line.1207">     *</a>
+<span class="sourceLineNo">1208</span><a id="line.1208">     * @param enableSubstitutionInVariables the new value of the flag</a>
+<span class="sourceLineNo">1209</span><a id="line.1209">     */</a>
+<span class="sourceLineNo">1210</span><a id="line.1210">    public void setEnableSubstitutionInVariables(</a>
+<span class="sourceLineNo">1211</span><a id="line.1211">            final boolean enableSubstitutionInVariables) {</a>
+<span class="sourceLineNo">1212</span><a id="line.1212">        this.enableSubstitutionInVariables = enableSubstitutionInVariables;</a>
+<span class="sourceLineNo">1213</span><a id="line.1213">    }</a>
+<span class="sourceLineNo">1214</span><a id="line.1214"></a>
+<span class="sourceLineNo">1215</span><a id="line.1215">    /**</a>
+<span class="sourceLineNo">1216</span><a id="line.1216">     * Returns a flag whether substitution is disabled in variable values.If set to</a>
+<span class="sourceLineNo">1217</span><a id="line.1217">     * &lt;b&gt;true&lt;/b&gt;, the values of variables can contain other variables will not be</a>
+<span class="sourceLineNo">1218</span><a id="line.1218">     * processed and substituted original variable is evaluated, e.g.</a>
+<span class="sourceLineNo">1219</span><a id="line.1219">     * &lt;pre&gt;</a>
+<span class="sourceLineNo">1220</span><a id="line.1220">     * Map valuesMap = HashMap();</a>
+<span class="sourceLineNo">1221</span><a id="line.1221">     * valuesMap.put(&amp;quot;name&amp;quot;, &amp;quot;Douglas ${surname}&amp;quot;);</a>
+<span class="sourceLineNo">1222</span><a id="line.1222">     * valuesMap.put(&amp;quot;surname&amp;quot;, &amp;quot;Crockford&amp;quot;);</a>
+<span class="sourceLineNo">1223</span><a id="line.1223">     * String templateString = &amp;quot;Hi ${name}&amp;quot;;</a>
+<span class="sourceLineNo">1224</span><a id="line.1224">     * StrSubstitutor sub = new StrSubstitutor(valuesMap);</a>
+<span class="sourceLineNo">1225</span><a id="line.1225">     * String resolvedString = sub.replace(templateString);</a>
+<span class="sourceLineNo">1226</span><a id="line.1226">     * &lt;/pre&gt;</a>
+<span class="sourceLineNo">1227</span><a id="line.1227">     * yielding:</a>
+<span class="sourceLineNo">1228</span><a id="line.1228">     * &lt;pre&gt;</a>
+<span class="sourceLineNo">1229</span><a id="line.1229">     *      Hi Douglas ${surname}</a>
+<span class="sourceLineNo">1230</span><a id="line.1230">     * &lt;/pre&gt;</a>
+<span class="sourceLineNo">1231</span><a id="line.1231">     *</a>
+<span class="sourceLineNo">1232</span><a id="line.1232">     * @return the substitution in variable values flag</a>
+<span class="sourceLineNo">1233</span><a id="line.1233">     *</a>
+<span class="sourceLineNo">1234</span><a id="line.1234">     * @since 1.2</a>
+<span class="sourceLineNo">1235</span><a id="line.1235">     */</a>
+<span class="sourceLineNo">1236</span><a id="line.1236">    public boolean isDisableSubstitutionInValues() {</a>
+<span class="sourceLineNo">1237</span><a id="line.1237">        return disableSubstitutionInValues;</a>
+<span class="sourceLineNo">1238</span><a id="line.1238">    }</a>
+<span class="sourceLineNo">1239</span><a id="line.1239"></a>
+<span class="sourceLineNo">1240</span><a id="line.1240">    /**</a>
+<span class="sourceLineNo">1241</span><a id="line.1241">     * Sets a flag whether substitution is done in variable values (recursive).</a>
+<span class="sourceLineNo">1242</span><a id="line.1242">     *</a>
+<span class="sourceLineNo">1243</span><a id="line.1243">     * @param disableSubstitutionInValues true if substitution in variable value are disabled</a>
+<span class="sourceLineNo">1244</span><a id="line.1244">     *</a>
+<span class="sourceLineNo">1245</span><a id="line.1245">     * @since 1.2</a>
+<span class="sourceLineNo">1246</span><a id="line.1246">     */</a>
+<span class="sourceLineNo">1247</span><a id="line.1247">    public void setDisableSubstitutionInValues(final boolean disableSubstitutionInValues) {</a>
+<span class="sourceLineNo">1248</span><a id="line.1248">        this.disableSubstitutionInValues = disableSubstitutionInValues;</a>
+<span class="sourceLineNo">1249</span><a id="line.1249">    }</a>
+<span class="sourceLineNo">1250</span><a id="line.1250"></a>
+<span class="sourceLineNo">1251</span><a id="line.1251">    /**</a>
+<span class="sourceLineNo">1252</span><a id="line.1252">     * Returns the flag controlling whether escapes are preserved during</a>
+<span class="sourceLineNo">1253</span><a id="line.1253">     * substitution.</a>
+<span class="sourceLineNo">1254</span><a id="line.1254">     *</a>
+<span class="sourceLineNo">1255</span><a id="line.1255">     * @return the preserve escape flag</a>
+<span class="sourceLineNo">1256</span><a id="line.1256">     */</a>
+<span class="sourceLineNo">1257</span><a id="line.1257">    public boolean isPreserveEscapes() {</a>
+<span class="sourceLineNo">1258</span><a id="line.1258">        return preserveEscapes;</a>
+<span class="sourceLineNo">1259</span><a id="line.1259">    }</a>
+<span class="sourceLineNo">1260</span><a id="line.1260"></a>
+<span class="sourceLineNo">1261</span><a id="line.1261">    /**</a>
+<span class="sourceLineNo">1262</span><a id="line.1262">     * Sets a flag controlling whether escapes are preserved during</a>
+<span class="sourceLineNo">1263</span><a id="line.1263">     * substitution.  If set to &lt;b&gt;true&lt;/b&gt;, the escape character is retained</a>
+<span class="sourceLineNo">1264</span><a id="line.1264">     * during substitution (e.g. &lt;code&gt;$${this-is-escaped}&lt;/code&gt; remains</a>
+<span class="sourceLineNo">1265</span><a id="line.1265">     * &lt;code&gt;$${this-is-escaped}&lt;/code&gt;).  If set to &lt;b&gt;false&lt;/b&gt;, the escape</a>
+<span class="sourceLineNo">1266</span><a id="line.1266">     * character is removed during substitution (e.g.</a>
+<span class="sourceLineNo">1267</span><a id="line.1267">     * &lt;code&gt;$${this-is-escaped}&lt;/code&gt; becomes</a>
+<span class="sourceLineNo">1268</span><a id="line.1268">     * &lt;code&gt;${this-is-escaped}&lt;/code&gt;).  The default value is &lt;b&gt;false&lt;/b&gt;</a>
+<span class="sourceLineNo">1269</span><a id="line.1269">     *</a>
+<span class="sourceLineNo">1270</span><a id="line.1270">     * @param preserveEscapes true if escapes are to be preserved</a>
+<span class="sourceLineNo">1271</span><a id="line.1271">     */</a>
+<span class="sourceLineNo">1272</span><a id="line.1272">    public void setPreserveEscapes(final boolean preserveEscapes) {</a>
+<span class="sourceLineNo">1273</span><a id="line.1273">        this.preserveEscapes = preserveEscapes;</a>
+<span class="sourceLineNo">1274</span><a id="line.1274">    }</a>
+<span class="sourceLineNo">1275</span><a id="line.1275">}</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</main>
+</body>
+</html>

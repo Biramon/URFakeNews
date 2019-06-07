@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"org.apache.commons.text"},{"l":"org.apache.commons.text.diff"},{"l":"org.apache.commons.text.lookup"},{"l":"org.apache.commons.text.matcher"},{"l":"org.apache.commons.text.similarity"},{"l":"org.apache.commons.text.translate"}]

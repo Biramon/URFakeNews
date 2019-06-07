@@ -1,0 +1,405 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<main role="main">
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a id="line.1">/*</a>
+<span class="sourceLineNo">002</span><a id="line.2"> * Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<span class="sourceLineNo">003</span><a id="line.3"> * contributor license agreements.  See the NOTICE file distributed with</a>
+<span class="sourceLineNo">004</span><a id="line.4"> * this work for additional information regarding copyright ownership.</a>
+<span class="sourceLineNo">005</span><a id="line.5"> * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<span class="sourceLineNo">006</span><a id="line.6"> * (the "License"); you may not use this file except in compliance with</a>
+<span class="sourceLineNo">007</span><a id="line.7"> * the License.  You may obtain a copy of the License at</a>
+<span class="sourceLineNo">008</span><a id="line.8"> *</a>
+<span class="sourceLineNo">009</span><a id="line.9"> *      http://www.apache.org/licenses/LICENSE-2.0</a>
+<span class="sourceLineNo">010</span><a id="line.10"> *</a>
+<span class="sourceLineNo">011</span><a id="line.11"> * Unless required by applicable law or agreed to in writing, software</a>
+<span class="sourceLineNo">012</span><a id="line.12"> * distributed under the License is distributed on an "AS IS" BASIS,</a>
+<span class="sourceLineNo">013</span><a id="line.13"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<span class="sourceLineNo">014</span><a id="line.14"> * See the License for the specific language governing permissions and</a>
+<span class="sourceLineNo">015</span><a id="line.15"> * limitations under the License.</a>
+<span class="sourceLineNo">016</span><a id="line.16"> */</a>
+<span class="sourceLineNo">017</span><a id="line.17">package org.apache.commons.text.diff;</a>
+<span class="sourceLineNo">018</span><a id="line.18"></a>
+<span class="sourceLineNo">019</span><a id="line.19">/**</a>
+<span class="sourceLineNo">020</span><a id="line.20"> * &lt;p&gt;</a>
+<span class="sourceLineNo">021</span><a id="line.21"> * It is guaranteed that the comparisons will always be done as</a>
+<span class="sourceLineNo">022</span><a id="line.22"> * &lt;code&gt;o1.equals(o2)&lt;/code&gt; where &lt;code&gt;o1&lt;/code&gt; belongs to the first</a>
+<span class="sourceLineNo">023</span><a id="line.23"> * sequence and &lt;code&gt;o2&lt;/code&gt; belongs to the second sequence. This can</a>
+<span class="sourceLineNo">024</span><a id="line.24"> * be important if subclassing is used for some elements in the first</a>
+<span class="sourceLineNo">025</span><a id="line.25"> * sequence and the &lt;code&gt;equals&lt;/code&gt; method is specialized.</a>
+<span class="sourceLineNo">026</span><a id="line.26"> * &lt;/p&gt;</a>
+<span class="sourceLineNo">027</span><a id="line.27"> * &lt;p&gt;</a>
+<span class="sourceLineNo">028</span><a id="line.28"> * Comparison can be seen from two points of view: either as giving the smallest</a>
+<span class="sourceLineNo">029</span><a id="line.29"> * modification allowing to transform the first sequence into the second one, or</a>
+<span class="sourceLineNo">030</span><a id="line.30"> * as giving the longest sequence which is a subsequence of both initial</a>
+<span class="sourceLineNo">031</span><a id="line.31"> * sequences. The &lt;code&gt;equals&lt;/code&gt; method is used to compare objects, so any</a>
+<span class="sourceLineNo">032</span><a id="line.32"> * object can be put into sequences. Modifications include deleting, inserting</a>
+<span class="sourceLineNo">033</span><a id="line.33"> * or keeping one object, starting from the beginning of the first sequence.</a>
+<span class="sourceLineNo">034</span><a id="line.34"> * &lt;/p&gt;</a>
+<span class="sourceLineNo">035</span><a id="line.35"> * &lt;p&gt;</a>
+<span class="sourceLineNo">036</span><a id="line.36"> * This class implements the comparison algorithm, which is the very efficient</a>
+<span class="sourceLineNo">037</span><a id="line.37"> * algorithm from Eugene W. Myers</a>
+<span class="sourceLineNo">038</span><a id="line.38"> * &lt;a href="http://www.cis.upenn.edu/~bcpierce/courses/dd/papers/diff.ps"&gt;</a>
+<span class="sourceLineNo">039</span><a id="line.39"> * An O(ND) Difference Algorithm and Its Variations&lt;/a&gt;. This algorithm produces</a>
+<span class="sourceLineNo">040</span><a id="line.40"> * the shortest possible {@link EditScript edit script} containing all the</a>
+<span class="sourceLineNo">041</span><a id="line.41"> * {@link EditCommand commands} needed to transform the first sequence into</a>
+<span class="sourceLineNo">042</span><a id="line.42"> * the second one.</a>
+<span class="sourceLineNo">043</span><a id="line.43"> *</a>
+<span class="sourceLineNo">044</span><a id="line.44"> * &lt;p&gt;</a>
+<span class="sourceLineNo">045</span><a id="line.45"> * This code has been adapted from Apache Commons Collections 4.0.</a>
+<span class="sourceLineNo">046</span><a id="line.46"> * &lt;/p&gt;</a>
+<span class="sourceLineNo">047</span><a id="line.47"> *</a>
+<span class="sourceLineNo">048</span><a id="line.48"> * @see EditScript</a>
+<span class="sourceLineNo">049</span><a id="line.49"> * @see EditCommand</a>
+<span class="sourceLineNo">050</span><a id="line.50"> * @see CommandVisitor</a>
+<span class="sourceLineNo">051</span><a id="line.51"> * @since 1.0</a>
+<span class="sourceLineNo">052</span><a id="line.52"> */</a>
+<span class="sourceLineNo">053</span><a id="line.53">public class StringsComparator {</a>
+<span class="sourceLineNo">054</span><a id="line.54"></a>
+<span class="sourceLineNo">055</span><a id="line.55">    /**</a>
+<span class="sourceLineNo">056</span><a id="line.56">     * First character sequence.</a>
+<span class="sourceLineNo">057</span><a id="line.57">     */</a>
+<span class="sourceLineNo">058</span><a id="line.58">    private final String left;</a>
+<span class="sourceLineNo">059</span><a id="line.59">    /**</a>
+<span class="sourceLineNo">060</span><a id="line.60">     * Second character sequence.</a>
+<span class="sourceLineNo">061</span><a id="line.61">     */</a>
+<span class="sourceLineNo">062</span><a id="line.62">    private final String right;</a>
+<span class="sourceLineNo">063</span><a id="line.63">    /**</a>
+<span class="sourceLineNo">064</span><a id="line.64">     * Temporary array.</a>
+<span class="sourceLineNo">065</span><a id="line.65">     */</a>
+<span class="sourceLineNo">066</span><a id="line.66">    private final int[] vDown;</a>
+<span class="sourceLineNo">067</span><a id="line.67">    /**</a>
+<span class="sourceLineNo">068</span><a id="line.68">     * Temporary array.</a>
+<span class="sourceLineNo">069</span><a id="line.69">     */</a>
+<span class="sourceLineNo">070</span><a id="line.70">    private final int[] vUp;</a>
+<span class="sourceLineNo">071</span><a id="line.71"></a>
+<span class="sourceLineNo">072</span><a id="line.72">    /**</a>
+<span class="sourceLineNo">073</span><a id="line.73">     * Simple constructor.</a>
+<span class="sourceLineNo">074</span><a id="line.74">     * &lt;p&gt;</a>
+<span class="sourceLineNo">075</span><a id="line.75">     * Creates a new instance of StringsComparator.</a>
+<span class="sourceLineNo">076</span><a id="line.76">     * &lt;/p&gt;</a>
+<span class="sourceLineNo">077</span><a id="line.77">     * &lt;p&gt;</a>
+<span class="sourceLineNo">078</span><a id="line.78">     * It is &lt;em&gt;guaranteed&lt;/em&gt; that the comparisons will always be done as</a>
+<span class="sourceLineNo">079</span><a id="line.79">     * &lt;code&gt;o1.equals(o2)&lt;/code&gt; where &lt;code&gt;o1&lt;/code&gt; belongs to the first</a>
+<span class="sourceLineNo">080</span><a id="line.80">     * sequence and &lt;code&gt;o2&lt;/code&gt; belongs to the second sequence. This can be</a>
+<span class="sourceLineNo">081</span><a id="line.81">     * important if subclassing is used for some elements in the first sequence</a>
+<span class="sourceLineNo">082</span><a id="line.82">     * and the &lt;code&gt;equals&lt;/code&gt; method is specialized.</a>
+<span class="sourceLineNo">083</span><a id="line.83">     * &lt;/p&gt;</a>
+<span class="sourceLineNo">084</span><a id="line.84">     *</a>
+<span class="sourceLineNo">085</span><a id="line.85">     * @param left first character sequence to be compared</a>
+<span class="sourceLineNo">086</span><a id="line.86">     * @param right second character sequence to be compared</a>
+<span class="sourceLineNo">087</span><a id="line.87">     */</a>
+<span class="sourceLineNo">088</span><a id="line.88">    public StringsComparator(final String left, final String right) {</a>
+<span class="sourceLineNo">089</span><a id="line.89">        this.left = left;</a>
+<span class="sourceLineNo">090</span><a id="line.90">        this.right = right;</a>
+<span class="sourceLineNo">091</span><a id="line.91"></a>
+<span class="sourceLineNo">092</span><a id="line.92">        final int size = left.length() + right.length() + 2;</a>
+<span class="sourceLineNo">093</span><a id="line.93">        vDown = new int[size];</a>
+<span class="sourceLineNo">094</span><a id="line.94">        vUp   = new int[size];</a>
+<span class="sourceLineNo">095</span><a id="line.95">    }</a>
+<span class="sourceLineNo">096</span><a id="line.96"></a>
+<span class="sourceLineNo">097</span><a id="line.97">    /**</a>
+<span class="sourceLineNo">098</span><a id="line.98">     * Get the {@link EditScript} object.</a>
+<span class="sourceLineNo">099</span><a id="line.99">     * &lt;p&gt;</a>
+<span class="sourceLineNo">100</span><a id="line.100">     * It is guaranteed that the objects embedded in the {@link InsertCommand</a>
+<span class="sourceLineNo">101</span><a id="line.101">     * insert commands} come from the second sequence and that the objects</a>
+<span class="sourceLineNo">102</span><a id="line.102">     * embedded in either the {@link DeleteCommand delete commands} or</a>
+<span class="sourceLineNo">103</span><a id="line.103">     * {@link KeepCommand keep commands} come from the first sequence. This can</a>
+<span class="sourceLineNo">104</span><a id="line.104">     * be important if subclassing is used for some elements in the first</a>
+<span class="sourceLineNo">105</span><a id="line.105">     * sequence and the &lt;code&gt;equals&lt;/code&gt; method is specialized.</a>
+<span class="sourceLineNo">106</span><a id="line.106">     * &lt;/p&gt;</a>
+<span class="sourceLineNo">107</span><a id="line.107">     *</a>
+<span class="sourceLineNo">108</span><a id="line.108">     * @return the edit script resulting from the comparison of the two</a>
+<span class="sourceLineNo">109</span><a id="line.109">     *         sequences</a>
+<span class="sourceLineNo">110</span><a id="line.110">     */</a>
+<span class="sourceLineNo">111</span><a id="line.111">    public EditScript&lt;Character&gt; getScript() {</a>
+<span class="sourceLineNo">112</span><a id="line.112">        final EditScript&lt;Character&gt; script = new EditScript&lt;&gt;();</a>
+<span class="sourceLineNo">113</span><a id="line.113">        buildScript(0, left.length(), 0, right.length(), script);</a>
+<span class="sourceLineNo">114</span><a id="line.114">        return script;</a>
+<span class="sourceLineNo">115</span><a id="line.115">    }</a>
+<span class="sourceLineNo">116</span><a id="line.116"></a>
+<span class="sourceLineNo">117</span><a id="line.117">    /**</a>
+<span class="sourceLineNo">118</span><a id="line.118">     * Build an edit script.</a>
+<span class="sourceLineNo">119</span><a id="line.119">     *</a>
+<span class="sourceLineNo">120</span><a id="line.120">     * @param start1  the begin of the first sequence to be compared</a>
+<span class="sourceLineNo">121</span><a id="line.121">     * @param end1  the end of the first sequence to be compared</a>
+<span class="sourceLineNo">122</span><a id="line.122">     * @param start2  the begin of the second sequence to be compared</a>
+<span class="sourceLineNo">123</span><a id="line.123">     * @param end2  the end of the second sequence to be compared</a>
+<span class="sourceLineNo">124</span><a id="line.124">     * @param script the edited script</a>
+<span class="sourceLineNo">125</span><a id="line.125">     */</a>
+<span class="sourceLineNo">126</span><a id="line.126">    private void buildScript(final int start1, final int end1, final int start2, final int end2,</a>
+<span class="sourceLineNo">127</span><a id="line.127">            final EditScript&lt;Character&gt; script) {</a>
+<span class="sourceLineNo">128</span><a id="line.128">        final Snake middle = getMiddleSnake(start1, end1, start2, end2);</a>
+<span class="sourceLineNo">129</span><a id="line.129"></a>
+<span class="sourceLineNo">130</span><a id="line.130">        if (middle == null</a>
+<span class="sourceLineNo">131</span><a id="line.131">                || middle.getStart() == end1 &amp;&amp; middle.getDiag() == end1 - end2</a>
+<span class="sourceLineNo">132</span><a id="line.132">                || middle.getEnd() == start1 &amp;&amp; middle.getDiag() == start1 - start2) {</a>
+<span class="sourceLineNo">133</span><a id="line.133"></a>
+<span class="sourceLineNo">134</span><a id="line.134">            int i = start1;</a>
+<span class="sourceLineNo">135</span><a id="line.135">            int j = start2;</a>
+<span class="sourceLineNo">136</span><a id="line.136">            while (i &lt; end1 || j &lt; end2) {</a>
+<span class="sourceLineNo">137</span><a id="line.137">                if (i &lt; end1 &amp;&amp; j &lt; end2 &amp;&amp; left.charAt(i) == right.charAt(j)) {</a>
+<span class="sourceLineNo">138</span><a id="line.138">                    script.append(new KeepCommand&lt;&gt;(left.charAt(i)));</a>
+<span class="sourceLineNo">139</span><a id="line.139">                    ++i;</a>
+<span class="sourceLineNo">140</span><a id="line.140">                    ++j;</a>
+<span class="sourceLineNo">141</span><a id="line.141">                } else {</a>
+<span class="sourceLineNo">142</span><a id="line.142">                    if (end1 - start1 &gt; end2 - start2) {</a>
+<span class="sourceLineNo">143</span><a id="line.143">                        script.append(new DeleteCommand&lt;&gt;(left.charAt(i)));</a>
+<span class="sourceLineNo">144</span><a id="line.144">                        ++i;</a>
+<span class="sourceLineNo">145</span><a id="line.145">                    } else {</a>
+<span class="sourceLineNo">146</span><a id="line.146">                        script.append(new InsertCommand&lt;&gt;(right.charAt(j)));</a>
+<span class="sourceLineNo">147</span><a id="line.147">                        ++j;</a>
+<span class="sourceLineNo">148</span><a id="line.148">                    }</a>
+<span class="sourceLineNo">149</span><a id="line.149">                }</a>
+<span class="sourceLineNo">150</span><a id="line.150">            }</a>
+<span class="sourceLineNo">151</span><a id="line.151"></a>
+<span class="sourceLineNo">152</span><a id="line.152">        } else {</a>
+<span class="sourceLineNo">153</span><a id="line.153"></a>
+<span class="sourceLineNo">154</span><a id="line.154">            buildScript(start1, middle.getStart(),</a>
+<span class="sourceLineNo">155</span><a id="line.155">                        start2, middle.getStart() - middle.getDiag(),</a>
+<span class="sourceLineNo">156</span><a id="line.156">                        script);</a>
+<span class="sourceLineNo">157</span><a id="line.157">            for (int i = middle.getStart(); i &lt; middle.getEnd(); ++i) {</a>
+<span class="sourceLineNo">158</span><a id="line.158">                script.append(new KeepCommand&lt;&gt;(left.charAt(i)));</a>
+<span class="sourceLineNo">159</span><a id="line.159">            }</a>
+<span class="sourceLineNo">160</span><a id="line.160">            buildScript(middle.getEnd(), end1,</a>
+<span class="sourceLineNo">161</span><a id="line.161">                        middle.getEnd() - middle.getDiag(), end2,</a>
+<span class="sourceLineNo">162</span><a id="line.162">                        script);</a>
+<span class="sourceLineNo">163</span><a id="line.163">        }</a>
+<span class="sourceLineNo">164</span><a id="line.164">    }</a>
+<span class="sourceLineNo">165</span><a id="line.165"></a>
+<span class="sourceLineNo">166</span><a id="line.166">    /**</a>
+<span class="sourceLineNo">167</span><a id="line.167">     * Get the middle snake corresponding to two subsequences of the</a>
+<span class="sourceLineNo">168</span><a id="line.168">     * main sequences.</a>
+<span class="sourceLineNo">169</span><a id="line.169">     * &lt;p&gt;</a>
+<span class="sourceLineNo">170</span><a id="line.170">     * The snake is found using the MYERS Algorithm (this algorithms has</a>
+<span class="sourceLineNo">171</span><a id="line.171">     * also been implemented in the GNU diff program). This algorithm is</a>
+<span class="sourceLineNo">172</span><a id="line.172">     * explained in Eugene Myers article:</a>
+<span class="sourceLineNo">173</span><a id="line.173">     * &lt;a href="http://www.cs.arizona.edu/people/gene/PAPERS/diff.ps"&gt;</a>
+<span class="sourceLineNo">174</span><a id="line.174">     * An O(ND) Difference Algorithm and Its Variations&lt;/a&gt;.</a>
+<span class="sourceLineNo">175</span><a id="line.175">     * &lt;/p&gt;</a>
+<span class="sourceLineNo">176</span><a id="line.176">     *</a>
+<span class="sourceLineNo">177</span><a id="line.177">     * @param start1  the begin of the first sequence to be compared</a>
+<span class="sourceLineNo">178</span><a id="line.178">     * @param end1  the end of the first sequence to be compared</a>
+<span class="sourceLineNo">179</span><a id="line.179">     * @param start2  the begin of the second sequence to be compared</a>
+<span class="sourceLineNo">180</span><a id="line.180">     * @param end2  the end of the second sequence to be compared</a>
+<span class="sourceLineNo">181</span><a id="line.181">     * @return the middle snake</a>
+<span class="sourceLineNo">182</span><a id="line.182">     */</a>
+<span class="sourceLineNo">183</span><a id="line.183">    private Snake getMiddleSnake(final int start1, final int end1, final int start2, final int end2) {</a>
+<span class="sourceLineNo">184</span><a id="line.184">        // Myers Algorithm</a>
+<span class="sourceLineNo">185</span><a id="line.185">        // Initialisations</a>
+<span class="sourceLineNo">186</span><a id="line.186">        final int m = end1 - start1;</a>
+<span class="sourceLineNo">187</span><a id="line.187">        final int n = end2 - start2;</a>
+<span class="sourceLineNo">188</span><a id="line.188">        if (m == 0 || n == 0) {</a>
+<span class="sourceLineNo">189</span><a id="line.189">            return null;</a>
+<span class="sourceLineNo">190</span><a id="line.190">        }</a>
+<span class="sourceLineNo">191</span><a id="line.191"></a>
+<span class="sourceLineNo">192</span><a id="line.192">        final int delta  = m - n;</a>
+<span class="sourceLineNo">193</span><a id="line.193">        final int sum    = n + m;</a>
+<span class="sourceLineNo">194</span><a id="line.194">        final int offset = (sum % 2 == 0 ? sum : sum + 1) / 2;</a>
+<span class="sourceLineNo">195</span><a id="line.195">        vDown[1 + offset] = start1;</a>
+<span class="sourceLineNo">196</span><a id="line.196">        vUp[1 + offset]   = end1 + 1;</a>
+<span class="sourceLineNo">197</span><a id="line.197"></a>
+<span class="sourceLineNo">198</span><a id="line.198">        for (int d = 0; d &lt;= offset; ++d) {</a>
+<span class="sourceLineNo">199</span><a id="line.199">            // Down</a>
+<span class="sourceLineNo">200</span><a id="line.200">            for (int k = -d; k &lt;= d; k += 2) {</a>
+<span class="sourceLineNo">201</span><a id="line.201">                // First step</a>
+<span class="sourceLineNo">202</span><a id="line.202"></a>
+<span class="sourceLineNo">203</span><a id="line.203">                final int i = k + offset;</a>
+<span class="sourceLineNo">204</span><a id="line.204">                if (k == -d || k != d &amp;&amp; vDown[i - 1] &lt; vDown[i + 1]) {</a>
+<span class="sourceLineNo">205</span><a id="line.205">                    vDown[i] = vDown[i + 1];</a>
+<span class="sourceLineNo">206</span><a id="line.206">                } else {</a>
+<span class="sourceLineNo">207</span><a id="line.207">                    vDown[i] = vDown[i - 1] + 1;</a>
+<span class="sourceLineNo">208</span><a id="line.208">                }</a>
+<span class="sourceLineNo">209</span><a id="line.209"></a>
+<span class="sourceLineNo">210</span><a id="line.210">                int x = vDown[i];</a>
+<span class="sourceLineNo">211</span><a id="line.211">                int y = x - start1 + start2 - k;</a>
+<span class="sourceLineNo">212</span><a id="line.212"></a>
+<span class="sourceLineNo">213</span><a id="line.213">                while (x &lt; end1 &amp;&amp; y &lt; end2 &amp;&amp; left.charAt(x) == right.charAt(y)) {</a>
+<span class="sourceLineNo">214</span><a id="line.214">                    vDown[i] = ++x;</a>
+<span class="sourceLineNo">215</span><a id="line.215">                    ++y;</a>
+<span class="sourceLineNo">216</span><a id="line.216">                }</a>
+<span class="sourceLineNo">217</span><a id="line.217">                // Second step</a>
+<span class="sourceLineNo">218</span><a id="line.218">                if (delta % 2 != 0 &amp;&amp; delta - d &lt;= k &amp;&amp; k &lt;= delta + d) {</a>
+<span class="sourceLineNo">219</span><a id="line.219">                    if (vUp[i - delta] &lt;= vDown[i]) { // NOPMD</a>
+<span class="sourceLineNo">220</span><a id="line.220">                        return buildSnake(vUp[i - delta], k + start1 - start2, end1, end2);</a>
+<span class="sourceLineNo">221</span><a id="line.221">                    }</a>
+<span class="sourceLineNo">222</span><a id="line.222">                }</a>
+<span class="sourceLineNo">223</span><a id="line.223">            }</a>
+<span class="sourceLineNo">224</span><a id="line.224"></a>
+<span class="sourceLineNo">225</span><a id="line.225">            // Up</a>
+<span class="sourceLineNo">226</span><a id="line.226">            for (int k = delta - d; k &lt;= delta + d; k += 2) {</a>
+<span class="sourceLineNo">227</span><a id="line.227">                // First step</a>
+<span class="sourceLineNo">228</span><a id="line.228">                final int i = k + offset - delta;</a>
+<span class="sourceLineNo">229</span><a id="line.229">                if (k == delta - d</a>
+<span class="sourceLineNo">230</span><a id="line.230">                        || k != delta + d &amp;&amp; vUp[i + 1] &lt;= vUp[i - 1]) {</a>
+<span class="sourceLineNo">231</span><a id="line.231">                    vUp[i] = vUp[i + 1] - 1;</a>
+<span class="sourceLineNo">232</span><a id="line.232">                } else {</a>
+<span class="sourceLineNo">233</span><a id="line.233">                    vUp[i] = vUp[i - 1];</a>
+<span class="sourceLineNo">234</span><a id="line.234">                }</a>
+<span class="sourceLineNo">235</span><a id="line.235"></a>
+<span class="sourceLineNo">236</span><a id="line.236">                int x = vUp[i] - 1;</a>
+<span class="sourceLineNo">237</span><a id="line.237">                int y = x - start1 + start2 - k;</a>
+<span class="sourceLineNo">238</span><a id="line.238">                while (x &gt;= start1 &amp;&amp; y &gt;= start2</a>
+<span class="sourceLineNo">239</span><a id="line.239">                        &amp;&amp; left.charAt(x) == right.charAt(y)) {</a>
+<span class="sourceLineNo">240</span><a id="line.240">                    vUp[i] = x--;</a>
+<span class="sourceLineNo">241</span><a id="line.241">                    y--;</a>
+<span class="sourceLineNo">242</span><a id="line.242">                }</a>
+<span class="sourceLineNo">243</span><a id="line.243">                // Second step</a>
+<span class="sourceLineNo">244</span><a id="line.244">                if (delta % 2 == 0 &amp;&amp; -d &lt;= k &amp;&amp; k &lt;= d) {</a>
+<span class="sourceLineNo">245</span><a id="line.245">                    if (vUp[i] &lt;= vDown[i + delta]) { // NOPMD</a>
+<span class="sourceLineNo">246</span><a id="line.246">                        return buildSnake(vUp[i], k + start1 - start2, end1, end2);</a>
+<span class="sourceLineNo">247</span><a id="line.247">                    }</a>
+<span class="sourceLineNo">248</span><a id="line.248">                }</a>
+<span class="sourceLineNo">249</span><a id="line.249">            }</a>
+<span class="sourceLineNo">250</span><a id="line.250">        }</a>
+<span class="sourceLineNo">251</span><a id="line.251"></a>
+<span class="sourceLineNo">252</span><a id="line.252">        // this should not happen</a>
+<span class="sourceLineNo">253</span><a id="line.253">        throw new RuntimeException("Internal Error");</a>
+<span class="sourceLineNo">254</span><a id="line.254">    }</a>
+<span class="sourceLineNo">255</span><a id="line.255"></a>
+<span class="sourceLineNo">256</span><a id="line.256">    /**</a>
+<span class="sourceLineNo">257</span><a id="line.257">     * Build a snake.</a>
+<span class="sourceLineNo">258</span><a id="line.258">     *</a>
+<span class="sourceLineNo">259</span><a id="line.259">     * @param start  the value of the start of the snake</a>
+<span class="sourceLineNo">260</span><a id="line.260">     * @param diag  the value of the diagonal of the snake</a>
+<span class="sourceLineNo">261</span><a id="line.261">     * @param end1  the value of the end of the first sequence to be compared</a>
+<span class="sourceLineNo">262</span><a id="line.262">     * @param end2  the value of the end of the second sequence to be compared</a>
+<span class="sourceLineNo">263</span><a id="line.263">     * @return the snake built</a>
+<span class="sourceLineNo">264</span><a id="line.264">     */</a>
+<span class="sourceLineNo">265</span><a id="line.265">    private Snake buildSnake(final int start, final int diag, final int end1, final int end2) {</a>
+<span class="sourceLineNo">266</span><a id="line.266">        int end = start;</a>
+<span class="sourceLineNo">267</span><a id="line.267">        while (end - diag &lt; end2</a>
+<span class="sourceLineNo">268</span><a id="line.268">                &amp;&amp; end &lt; end1</a>
+<span class="sourceLineNo">269</span><a id="line.269">                &amp;&amp; left.charAt(end) == right.charAt(end - diag)) {</a>
+<span class="sourceLineNo">270</span><a id="line.270">            ++end;</a>
+<span class="sourceLineNo">271</span><a id="line.271">        }</a>
+<span class="sourceLineNo">272</span><a id="line.272">        return new Snake(start, end, diag);</a>
+<span class="sourceLineNo">273</span><a id="line.273">    }</a>
+<span class="sourceLineNo">274</span><a id="line.274"></a>
+<span class="sourceLineNo">275</span><a id="line.275">    /**</a>
+<span class="sourceLineNo">276</span><a id="line.276">     * This class is a simple placeholder to hold the end part of a path</a>
+<span class="sourceLineNo">277</span><a id="line.277">     * under construction in a {@link StringsComparator StringsComparator}.</a>
+<span class="sourceLineNo">278</span><a id="line.278">     */</a>
+<span class="sourceLineNo">279</span><a id="line.279">    private static class Snake {</a>
+<span class="sourceLineNo">280</span><a id="line.280"></a>
+<span class="sourceLineNo">281</span><a id="line.281">        /** Start index. */</a>
+<span class="sourceLineNo">282</span><a id="line.282">        private final int start;</a>
+<span class="sourceLineNo">283</span><a id="line.283"></a>
+<span class="sourceLineNo">284</span><a id="line.284">        /** End index. */</a>
+<span class="sourceLineNo">285</span><a id="line.285">        private final int end;</a>
+<span class="sourceLineNo">286</span><a id="line.286"></a>
+<span class="sourceLineNo">287</span><a id="line.287">        /** Diagonal number. */</a>
+<span class="sourceLineNo">288</span><a id="line.288">        private final int diag;</a>
+<span class="sourceLineNo">289</span><a id="line.289"></a>
+<span class="sourceLineNo">290</span><a id="line.290">        /**</a>
+<span class="sourceLineNo">291</span><a id="line.291">         * Simple constructor. Creates a new instance of Snake with specified indices.</a>
+<span class="sourceLineNo">292</span><a id="line.292">         *</a>
+<span class="sourceLineNo">293</span><a id="line.293">         * @param start  start index of the snake</a>
+<span class="sourceLineNo">294</span><a id="line.294">         * @param end  end index of the snake</a>
+<span class="sourceLineNo">295</span><a id="line.295">         * @param diag  diagonal number</a>
+<span class="sourceLineNo">296</span><a id="line.296">         */</a>
+<span class="sourceLineNo">297</span><a id="line.297">        Snake(final int start, final int end, final int diag) {</a>
+<span class="sourceLineNo">298</span><a id="line.298">            this.start = start;</a>
+<span class="sourceLineNo">299</span><a id="line.299">            this.end   = end;</a>
+<span class="sourceLineNo">300</span><a id="line.300">            this.diag  = diag;</a>
+<span class="sourceLineNo">301</span><a id="line.301">        }</a>
+<span class="sourceLineNo">302</span><a id="line.302"></a>
+<span class="sourceLineNo">303</span><a id="line.303">        /**</a>
+<span class="sourceLineNo">304</span><a id="line.304">         * Get the start index of the snake.</a>
+<span class="sourceLineNo">305</span><a id="line.305">         *</a>
+<span class="sourceLineNo">306</span><a id="line.306">         * @return start index of the snake</a>
+<span class="sourceLineNo">307</span><a id="line.307">         */</a>
+<span class="sourceLineNo">308</span><a id="line.308">        public int getStart() {</a>
+<span class="sourceLineNo">309</span><a id="line.309">            return start;</a>
+<span class="sourceLineNo">310</span><a id="line.310">        }</a>
+<span class="sourceLineNo">311</span><a id="line.311"></a>
+<span class="sourceLineNo">312</span><a id="line.312">        /**</a>
+<span class="sourceLineNo">313</span><a id="line.313">         * Get the end index of the snake.</a>
+<span class="sourceLineNo">314</span><a id="line.314">         *</a>
+<span class="sourceLineNo">315</span><a id="line.315">         * @return end index of the snake</a>
+<span class="sourceLineNo">316</span><a id="line.316">         */</a>
+<span class="sourceLineNo">317</span><a id="line.317">        public int getEnd() {</a>
+<span class="sourceLineNo">318</span><a id="line.318">            return end;</a>
+<span class="sourceLineNo">319</span><a id="line.319">        }</a>
+<span class="sourceLineNo">320</span><a id="line.320"></a>
+<span class="sourceLineNo">321</span><a id="line.321">        /**</a>
+<span class="sourceLineNo">322</span><a id="line.322">         * Get the diagonal number of the snake.</a>
+<span class="sourceLineNo">323</span><a id="line.323">         *</a>
+<span class="sourceLineNo">324</span><a id="line.324">         * @return diagonal number of the snake</a>
+<span class="sourceLineNo">325</span><a id="line.325">         */</a>
+<span class="sourceLineNo">326</span><a id="line.326">        public int getDiag() {</a>
+<span class="sourceLineNo">327</span><a id="line.327">            return diag;</a>
+<span class="sourceLineNo">328</span><a id="line.328">        }</a>
+<span class="sourceLineNo">329</span><a id="line.329">    }</a>
+<span class="sourceLineNo">330</span><a id="line.330"></a>
+<span class="sourceLineNo">331</span><a id="line.331">}</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</main>
+</body>
+</html>

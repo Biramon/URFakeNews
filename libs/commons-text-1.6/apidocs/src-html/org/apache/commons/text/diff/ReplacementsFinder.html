@@ -1,0 +1,200 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<main role="main">
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span><a id="line.1">/*</a>
+<span class="sourceLineNo">002</span><a id="line.2"> * Licensed to the Apache Software Foundation (ASF) under one or more</a>
+<span class="sourceLineNo">003</span><a id="line.3"> * contributor license agreements.  See the NOTICE file distributed with</a>
+<span class="sourceLineNo">004</span><a id="line.4"> * this work for additional information regarding copyright ownership.</a>
+<span class="sourceLineNo">005</span><a id="line.5"> * The ASF licenses this file to You under the Apache License, Version 2.0</a>
+<span class="sourceLineNo">006</span><a id="line.6"> * (the "License"); you may not use this file except in compliance with</a>
+<span class="sourceLineNo">007</span><a id="line.7"> * the License.  You may obtain a copy of the License at</a>
+<span class="sourceLineNo">008</span><a id="line.8"> *</a>
+<span class="sourceLineNo">009</span><a id="line.9"> *      http://www.apache.org/licenses/LICENSE-2.0</a>
+<span class="sourceLineNo">010</span><a id="line.10"> *</a>
+<span class="sourceLineNo">011</span><a id="line.11"> * Unless required by applicable law or agreed to in writing, software</a>
+<span class="sourceLineNo">012</span><a id="line.12"> * distributed under the License is distributed on an "AS IS" BASIS,</a>
+<span class="sourceLineNo">013</span><a id="line.13"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</a>
+<span class="sourceLineNo">014</span><a id="line.14"> * See the License for the specific language governing permissions and</a>
+<span class="sourceLineNo">015</span><a id="line.15"> * limitations under the License.</a>
+<span class="sourceLineNo">016</span><a id="line.16"> */</a>
+<span class="sourceLineNo">017</span><a id="line.17">package org.apache.commons.text.diff;</a>
+<span class="sourceLineNo">018</span><a id="line.18"></a>
+<span class="sourceLineNo">019</span><a id="line.19">import java.util.ArrayList;</a>
+<span class="sourceLineNo">020</span><a id="line.20">import java.util.List;</a>
+<span class="sourceLineNo">021</span><a id="line.21"></a>
+<span class="sourceLineNo">022</span><a id="line.22">/**</a>
+<span class="sourceLineNo">023</span><a id="line.23"> * This class handles sequences of replacements resulting from a comparison.</a>
+<span class="sourceLineNo">024</span><a id="line.24"> * &lt;p&gt;</a>
+<span class="sourceLineNo">025</span><a id="line.25"> * The comparison of two objects sequences leads to the identification of common</a>
+<span class="sourceLineNo">026</span><a id="line.26"> * parts and parts which only belong to the first or to the second sequence. The</a>
+<span class="sourceLineNo">027</span><a id="line.27"> * common parts appear in the edit script in the form of &lt;em&gt;keep&lt;/em&gt; commands,</a>
+<span class="sourceLineNo">028</span><a id="line.28"> * they can be considered as synchronization objects between the two sequences.</a>
+<span class="sourceLineNo">029</span><a id="line.29"> * These synchronization objects split the two sequences in synchronized</a>
+<span class="sourceLineNo">030</span><a id="line.30"> * sub-sequences. The first sequence can be transformed into the second one by</a>
+<span class="sourceLineNo">031</span><a id="line.31"> * replacing each synchronized sub-sequence of the first sequence by the</a>
+<span class="sourceLineNo">032</span><a id="line.32"> * corresponding sub-sequence of the second sequence. This is a synthetic way to</a>
+<span class="sourceLineNo">033</span><a id="line.33"> * see an {@link EditScript edit script}, replacing individual</a>
+<span class="sourceLineNo">034</span><a id="line.34"> * {@link DeleteCommand delete}, {@link KeepCommand keep} and</a>
+<span class="sourceLineNo">035</span><a id="line.35"> * {@link InsertCommand insert} commands by fewer replacements acting on</a>
+<span class="sourceLineNo">036</span><a id="line.36"> * complete sub-sequences.</a>
+<span class="sourceLineNo">037</span><a id="line.37"> * &lt;/p&gt;</a>
+<span class="sourceLineNo">038</span><a id="line.38"> * &lt;p&gt;</a>
+<span class="sourceLineNo">039</span><a id="line.39"> * This class is devoted to perform this interpretation. It visits an</a>
+<span class="sourceLineNo">040</span><a id="line.40"> * {@link EditScript edit script} (because it implements the</a>
+<span class="sourceLineNo">041</span><a id="line.41"> * {@link CommandVisitor CommandVisitor} interface) and calls a user-supplied</a>
+<span class="sourceLineNo">042</span><a id="line.42"> * handler implementing the {@link ReplacementsHandler ReplacementsHandler}</a>
+<span class="sourceLineNo">043</span><a id="line.43"> * interface to process the sub-sequences.</a>
+<span class="sourceLineNo">044</span><a id="line.44"> * &lt;/p&gt;</a>
+<span class="sourceLineNo">045</span><a id="line.45"> *</a>
+<span class="sourceLineNo">046</span><a id="line.46"> * @see ReplacementsHandler</a>
+<span class="sourceLineNo">047</span><a id="line.47"> * @see EditScript</a>
+<span class="sourceLineNo">048</span><a id="line.48"> * @see StringsComparator</a>
+<span class="sourceLineNo">049</span><a id="line.49"> *</a>
+<span class="sourceLineNo">050</span><a id="line.50"> * @param &lt;T&gt; object type</a>
+<span class="sourceLineNo">051</span><a id="line.51"> * @since 1.0</a>
+<span class="sourceLineNo">052</span><a id="line.52"> */</a>
+<span class="sourceLineNo">053</span><a id="line.53">public class ReplacementsFinder&lt;T&gt; implements CommandVisitor&lt;T&gt; {</a>
+<span class="sourceLineNo">054</span><a id="line.54"></a>
+<span class="sourceLineNo">055</span><a id="line.55">    /**</a>
+<span class="sourceLineNo">056</span><a id="line.56">     * List of pending insertions.</a>
+<span class="sourceLineNo">057</span><a id="line.57">     */</a>
+<span class="sourceLineNo">058</span><a id="line.58">    private final List&lt;T&gt; pendingInsertions;</a>
+<span class="sourceLineNo">059</span><a id="line.59"></a>
+<span class="sourceLineNo">060</span><a id="line.60">    /**</a>
+<span class="sourceLineNo">061</span><a id="line.61">     * List of pending deletions.</a>
+<span class="sourceLineNo">062</span><a id="line.62">     */</a>
+<span class="sourceLineNo">063</span><a id="line.63">    private final List&lt;T&gt; pendingDeletions;</a>
+<span class="sourceLineNo">064</span><a id="line.64"></a>
+<span class="sourceLineNo">065</span><a id="line.65">    /**</a>
+<span class="sourceLineNo">066</span><a id="line.66">     * Count of elements skipped.</a>
+<span class="sourceLineNo">067</span><a id="line.67">     */</a>
+<span class="sourceLineNo">068</span><a id="line.68">    private int skipped;</a>
+<span class="sourceLineNo">069</span><a id="line.69"></a>
+<span class="sourceLineNo">070</span><a id="line.70">    /** Handler to call when synchronized sequences are found. */</a>
+<span class="sourceLineNo">071</span><a id="line.71">    private final ReplacementsHandler&lt;T&gt; handler;</a>
+<span class="sourceLineNo">072</span><a id="line.72"></a>
+<span class="sourceLineNo">073</span><a id="line.73">    /**</a>
+<span class="sourceLineNo">074</span><a id="line.74">     * Simple constructor. Creates a new instance of {@link ReplacementsFinder}.</a>
+<span class="sourceLineNo">075</span><a id="line.75">     *</a>
+<span class="sourceLineNo">076</span><a id="line.76">     * @param handler  handler to call when synchronized sequences are found</a>
+<span class="sourceLineNo">077</span><a id="line.77">     */</a>
+<span class="sourceLineNo">078</span><a id="line.78">    public ReplacementsFinder(final ReplacementsHandler&lt;T&gt; handler) {</a>
+<span class="sourceLineNo">079</span><a id="line.79">        pendingInsertions = new ArrayList&lt;&gt;();</a>
+<span class="sourceLineNo">080</span><a id="line.80">        pendingDeletions  = new ArrayList&lt;&gt;();</a>
+<span class="sourceLineNo">081</span><a id="line.81">        skipped           = 0;</a>
+<span class="sourceLineNo">082</span><a id="line.82">        this.handler      = handler;</a>
+<span class="sourceLineNo">083</span><a id="line.83">    }</a>
+<span class="sourceLineNo">084</span><a id="line.84"></a>
+<span class="sourceLineNo">085</span><a id="line.85">    /**</a>
+<span class="sourceLineNo">086</span><a id="line.86">     * Add an object to the pending insertions set.</a>
+<span class="sourceLineNo">087</span><a id="line.87">     *</a>
+<span class="sourceLineNo">088</span><a id="line.88">     * @param object  object to insert</a>
+<span class="sourceLineNo">089</span><a id="line.89">     */</a>
+<span class="sourceLineNo">090</span><a id="line.90">    @Override</a>
+<span class="sourceLineNo">091</span><a id="line.91">    public void visitInsertCommand(final T object) {</a>
+<span class="sourceLineNo">092</span><a id="line.92">        pendingInsertions.add(object);</a>
+<span class="sourceLineNo">093</span><a id="line.93">    }</a>
+<span class="sourceLineNo">094</span><a id="line.94"></a>
+<span class="sourceLineNo">095</span><a id="line.95">    /**</a>
+<span class="sourceLineNo">096</span><a id="line.96">     * Handle a synchronization object.</a>
+<span class="sourceLineNo">097</span><a id="line.97">     * &lt;p&gt;</a>
+<span class="sourceLineNo">098</span><a id="line.98">     * When a synchronization object is identified, the pending insertions and</a>
+<span class="sourceLineNo">099</span><a id="line.99">     * pending deletions sets are provided to the user handler as subsequences.</a>
+<span class="sourceLineNo">100</span><a id="line.100">     * &lt;/p&gt;</a>
+<span class="sourceLineNo">101</span><a id="line.101">     *</a>
+<span class="sourceLineNo">102</span><a id="line.102">     * @param object  synchronization object detected</a>
+<span class="sourceLineNo">103</span><a id="line.103">     */</a>
+<span class="sourceLineNo">104</span><a id="line.104">    @Override</a>
+<span class="sourceLineNo">105</span><a id="line.105">    public void visitKeepCommand(final T object) {</a>
+<span class="sourceLineNo">106</span><a id="line.106">        if (pendingDeletions.isEmpty() &amp;&amp; pendingInsertions.isEmpty()) {</a>
+<span class="sourceLineNo">107</span><a id="line.107">            ++skipped;</a>
+<span class="sourceLineNo">108</span><a id="line.108">        } else {</a>
+<span class="sourceLineNo">109</span><a id="line.109">            handler.handleReplacement(skipped, pendingDeletions, pendingInsertions);</a>
+<span class="sourceLineNo">110</span><a id="line.110">            pendingDeletions.clear();</a>
+<span class="sourceLineNo">111</span><a id="line.111">            pendingInsertions.clear();</a>
+<span class="sourceLineNo">112</span><a id="line.112">            skipped = 1;</a>
+<span class="sourceLineNo">113</span><a id="line.113">        }</a>
+<span class="sourceLineNo">114</span><a id="line.114">    }</a>
+<span class="sourceLineNo">115</span><a id="line.115"></a>
+<span class="sourceLineNo">116</span><a id="line.116">    /**</a>
+<span class="sourceLineNo">117</span><a id="line.117">     * Add an object to the pending deletions set.</a>
+<span class="sourceLineNo">118</span><a id="line.118">     *</a>
+<span class="sourceLineNo">119</span><a id="line.119">     * @param object  object to delete</a>
+<span class="sourceLineNo">120</span><a id="line.120">     */</a>
+<span class="sourceLineNo">121</span><a id="line.121">    @Override</a>
+<span class="sourceLineNo">122</span><a id="line.122">    public void visitDeleteCommand(final T object) {</a>
+<span class="sourceLineNo">123</span><a id="line.123">        pendingDeletions.add(object);</a>
+<span class="sourceLineNo">124</span><a id="line.124">    }</a>
+<span class="sourceLineNo">125</span><a id="line.125"></a>
+<span class="sourceLineNo">126</span><a id="line.126">}</a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</main>
+</body>
+</html>
