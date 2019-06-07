@@ -31,7 +31,7 @@
           </Menu>
           <Menu mnemonicParsing="false" text="Ajuda">
             <items>
-              <MenuItem fx:id="menuSobre" mnemonicParsing="false" text="Sobre" />
+              <MenuItem fx:id="miSobre" mnemonicParsing="false" onAction="#menuitemSobreClicado" text="Sobre" />
             </items>
           </Menu>
         </menus>
@@ -55,7 +55,7 @@
          <children>
             <ImageView fx:id="imagemLogo" fitHeight="187.0" fitWidth="305.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" GridPane.columnSpan="2">
                <image>
-                  <Image url="@logoinicial" />
+                  <Image url="@tenor.gif" />
                </image>
             </ImageView>
             <Label fx:id="labelInfoUsuario" text="Digite ou cole a URL da notícia a ser analisada abaixo:" GridPane.rowIndex="1">
@@ -65,9 +65,9 @@
             </Label>
             <TextField fx:id="textfieldURL" prefHeight="26.0" prefWidth="448.0" GridPane.rowIndex="2" />
             <Button fx:id="btAnalisarNoticia" mnemonicParsing="false" onAction="#AnalisarNoticia" text="Analisar Notícia" GridPane.columnSpan="2" GridPane.rowIndex="3" />
-            <Slider fx:id="slLimiarConfianca" blockIncrement="5.0" value="50.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Slider fx:id="slLimiarConfianca" blockIncrement="5.0" onMouseDragEntered="#SliderLimiarFoiSolto" onMouseDragOver="#SliderLimiarFoiSolto" onMouseDragReleased="#SliderLimiarFoiSolto" onMouseReleased="#SliderLimiarFoiSolto" onScroll="#SliderLimiarFoiSolto" value="50.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Label text="Limiar de Confiança" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label fx:id="valorLimiar" text="50" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="TOP" />
+            <Label fx:id="lvalorLimiar" text="50" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.valignment="TOP" />
          </children>
       </GridPane>
    </center>
