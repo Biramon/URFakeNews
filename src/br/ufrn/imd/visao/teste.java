@@ -15,6 +15,7 @@ import br.ufrn.imd.dominio.LeituraFileCSV;
 public class teste {
 
 	public static void main(String[] args) throws NoSuchAlgorithmException {
+		String mudanca = "";
 		String caminho = "C:\\Users\\Yan\\Downloads\\boatos.csv";
 		Noticia web = new Noticia();
 		Noticia web2 = new Noticia();
