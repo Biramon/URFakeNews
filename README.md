@@ -8,16 +8,18 @@ Implementado até o presente momento:
 * Processamento de mensagem
 * Armazenamento em estrutura(HashMap com key em SHA-1)
 * Leitura e armazenamento em arquivo CSV(boatos.csv)
+* Interface gráfica
+* Métodos de similaridade
 
 Pendente:
 
-* Interface gráfica
 * Web Scrapping
-* Métodos de similaridade
+
 
 Para a correta execução do projeto se faz necessário o uso dos seguintes jars:
 $ Apache Commons Lang » 3.9
 $ opencsv-4.6
+$ jsoupe 1.12.1
 
 (Os mesmos se encontram presentes na pasta libs do projeto)
 
